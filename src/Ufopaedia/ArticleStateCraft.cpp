@@ -146,6 +146,10 @@ namespace OpenXcom
 			ss2 << craft->getMaxUnits() << "/" << craft->getMaxUnitsLimit();
 			ss << tr("STR_CARGO_SPACE").arg(ss2.str()) << '\n';
 		}
+		if(Options::showCraftHangar)
+		{
+			ss << tr("STR_HANGAR_TYPE").arg(craft->getHangarType()) << '\n';
+		}			
 		if (craft->getPilots() > 0)
 		{
 			ss << tr("STR_COCKPIT_CAPACITY").arg(craft->getPilots()) << '\n';

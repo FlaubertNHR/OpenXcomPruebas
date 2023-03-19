@@ -34,7 +34,7 @@ const std::string RuleCraft::DEFAULT_CRAFT_DEPLOYMENT_PREVIEW = "STR_CRAFT_DEPLO
  * @param type String defining the type.
  */
 RuleCraft::RuleCraft(const std::string &type, int listOrder) :
-	_type(type), _sprite(-1), _marker(-1), _weapons(0), _maxUnitsLimit(-1), _pilots(0), _maxVehiclesAndLargeSoldiersLimit(-1),
+	_type(type), _sprite(-1), _marker(-1), _hangarType(-1), _weapons(0), maxUnitsLimit(-1), _pilots(0), _maxVehiclesAndLargeSoldiersLimit(-1),
 	_maxSmallSoldiers(-1), _maxLargeSoldiers(-1), _maxSmallVehicles(-1), _maxLargeVehicles(-1),
 	_maxSmallUnits(-1), _maxLargeUnits(-1), _maxSoldiers(-1), _maxVehicles(-1),
 	_monthlyBuyLimit(0), _costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
@@ -110,6 +110,7 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, const ModScript &parsers)
 	{
 		_marker = mod->getOffset(node["marker"].as<int>(_marker), 8);
 	}
+	_hangarType = node["hangarType"].as<int>(_hangarType);	
 	_weapons = node["weapons"].as<int>(_weapons);
 	_maxUnitsLimit = node["maxUnitsLimit"].as<int>(_maxUnitsLimit);
 	_pilots = node["pilots"].as<int>(_pilots);
@@ -273,6 +274,16 @@ int RuleCraft::getSprite(int skinIndex) const
 int RuleCraft::getMarker() const
 {
 	return _marker;
+}
+
+/**
+ * Returns the hangar type id in which
+ * craft can be allocated.
+ * @return hangar type ID, -1 if none.
+ */
+int RuleCraft::getHangarType() const	
+{
+	return _hangarType;
 }
 
 /**

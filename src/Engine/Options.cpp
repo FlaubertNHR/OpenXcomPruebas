@@ -203,13 +203,19 @@ void createOptionsOXC()
 void createAdvancedOptionsOXC()
 {
 	// advanced options
-	_info.push_back(OptionInfo(OPTION_OXC, "playIntro", &playIntro, true, "STR_PLAYINTRO", "STR_GENERAL"));
-	_info.push_back(OptionInfo(OPTION_OXC, "autosave", &autosave, true, "STR_AUTOSAVE", "STR_GENERAL"));
-	_info.push_back(OptionInfo(OPTION_OXC, "autosaveFrequency", &autosaveFrequency, 5, "STR_AUTOSAVE_FREQUENCY", "STR_GENERAL"));
-	_info.push_back(OptionInfo(OPTION_OXC, "newSeedOnLoad", &newSeedOnLoad, false, "STR_NEWSEEDONLOAD", "STR_GENERAL"));
-	_info.push_back(OptionInfo(OPTION_OXC, "lazyLoadResources", &lazyLoadResources, true, "STR_LAZY_LOADING", "STR_GENERAL")); // exposed in OXCE
-	_info.push_back(OptionInfo(OPTION_OXC, "mousewheelSpeed", &mousewheelSpeed, 3, "STR_MOUSEWHEEL_SPEED", "STR_GENERAL"));
-	_info.push_back(OptionInfo(OPTION_OXC, "changeValueByMouseWheel", &changeValueByMouseWheel, 0, "STR_CHANGEVALUEBYMOUSEWHEEL", "STR_GENERAL"));
+#ifdef _WIN32
+	_info.push_back(OptionInfo("oxceUpdateCheck", &oxceUpdateCheck, false, "STR_UPDATE_CHECK", "STR_GENERAL"));
+#endif
+	_info.push_back(OptionInfo("playIntro", &playIntro, true, "STR_PLAYINTRO", "STR_GENERAL"));
+	_info.push_back(OptionInfo("autosave", &autosave, true, "STR_AUTOSAVE", "STR_GENERAL"));
+	_info.push_back(OptionInfo("autosaveFrequency", &autosaveFrequency, 5, "STR_AUTOSAVE_FREQUENCY", "STR_GENERAL"));
+	_info.push_back(OptionInfo("autosaveSlots", &autosaveSlots, 1, "STR_AUTOSAVE_SLOTS", "STR_GENERAL")); // OXCE only
+	_info.push_back(OptionInfo("newSeedOnLoad", &newSeedOnLoad, false, "STR_NEWSEEDONLOAD", "STR_GENERAL"));
+	_info.push_back(OptionInfo("lazyLoadResources", &lazyLoadResources, true, "STR_LAZY_LOADING", "STR_GENERAL")); // exposed in OXCE
+	_info.push_back(OptionInfo("mousewheelSpeed", &mousewheelSpeed, 3, "STR_MOUSEWHEEL_SPEED", "STR_GENERAL"));
+	_info.push_back(OptionInfo("changeValueByMouseWheel", &changeValueByMouseWheel, 0, "STR_CHANGEVALUEBYMOUSEWHEEL", "STR_GENERAL"));
+	_info.push_back(OptionInfo("soldierDiaries", &soldierDiaries, true));
+	_info.push_back(OptionInfo("showCraftHangar", &showCraftHangar, false, "STR_SHOW_CRAFT_HANGAR", "STR_GENERAL"));	
 
 // this should probably be any small screen touch-device, i don't know the defines for all of them so i'll cover android and IOS as i imagine they're more common
 #ifdef __MOBILE__
