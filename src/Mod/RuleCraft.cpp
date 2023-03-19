@@ -44,7 +44,8 @@ RuleCraft::RuleCraft(const std::string &type, int listOrder) :
 	_missilePower(0),
 	_listOrder(listOrder), _maxAltitude(-1), _defaultAltitude("STR_VERY_LOW"), _onlyOneSoldierGroupAllowed(false), _stats(),
 	_shieldRechargeAtBase(1000),
-	_mapVisible(true), _forceShowInMonthlyCosts(false), _useAllStartTiles(false)
+	_mapVisible(true), _forceShowInMonthlyCosts(false), _useAllStartTiles(false),
+	_hangarType(-1)
 {
 	for (int i = 0; i < WeaponMax; ++ i)
 	{
@@ -113,7 +114,8 @@ void RuleCraft::load(const YAML::YamlNodeReader& node, Mod *mod, const ModScript
 	{
 		_marker = mod->getOffset(reader["marker"].readVal(_marker), 8);
 	}
-	reader.tryRead("weapons", _weapons);
+	reader.tryRead("hangarType", _hangarType));
+	reader.tryRead("weapons", _weapons);	
 	reader.tryRead("maxUnitsLimit", _maxUnitsLimit);
 	reader.tryRead("pilots", _pilots);
 	reader.tryRead("maxHWPUnitsLimit", _maxVehiclesAndLargeSoldiersLimit);
@@ -283,6 +285,16 @@ int RuleCraft::getSprite(int skinIndex) const
 int RuleCraft::getMarker() const
 {
 	return _marker;
+}
+
+/**
+ * Returns the hangar type id in which
+ * craft can be allocated.
+ * @return hangar type ID, -1 if none.
+ */
+int RuleCraft::getHangarType() const	
+{
+	return _hangarType;
 }
 
 /**
