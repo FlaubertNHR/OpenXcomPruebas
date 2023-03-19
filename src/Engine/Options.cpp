@@ -541,6 +541,7 @@ void createOptionsOTHER()
 void createAdvancedOptionsOTHER()
 {
 	// your fork's advanced options here
+    _info.push_back(OptionInfo(OPTION_OTHER,"showCraftHangar", &showCraftHangar, false, "STR_SHOW_CRAFT_HANGAR", "STR_GENERAL"));		
 }
 
 void createControlsOTHER()

@@ -42,7 +42,8 @@ RuleCraft::RuleCraft(const std::string &type, int listOrder) :
 	_keepCraftAfterFailedMission(false), _allowLanding(true), _spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _undetectable(false),
 	_listOrder(listOrder), _maxAltitude(-1), _defaultAltitude("STR_VERY_LOW"), _onlyOneSoldierGroupAllowed(false), _stats(),
 	_shieldRechargeAtBase(1000),
-	_mapVisible(true), _forceShowInMonthlyCosts(false), _useAllStartTiles(false)
+	_mapVisible(true), _forceShowInMonthlyCosts(false), _useAllStartTiles(false),
+	_hangarType(-1)
 {
 	for (int i = 0; i < WeaponMax; ++ i)
 	{
@@ -110,6 +111,7 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, const ModScript &parsers)
 	{
 		_marker = mod->getOffset(node["marker"].as<int>(_marker), 8);
 	}
+	_hangarType = node["hangarType"].as<int>(_hangarType);	
 	_weapons = node["weapons"].as<int>(_weapons);
 	_maxUnitsLimit = node["maxUnitsLimit"].as<int>(_maxUnitsLimit);
 	_pilots = node["pilots"].as<int>(_pilots);
@@ -273,6 +275,16 @@ int RuleCraft::getSprite(int skinIndex) const
 int RuleCraft::getMarker() const
 {
 	return _marker;
+}
+
+/**
+ * Returns the hangar type id in which
+ * craft can be allocated.
+ * @return hangar type ID, -1 if none.
+ */
+int RuleCraft::getHangarType() const	
+{
+	return _hangarType;
 }
 
 /**

@@ -46,7 +46,8 @@ BaseView::BaseView(int width, int height, int x, int y) : InteractiveSurface(wid
 	_gridX(0), _gridY(0), _selSizeX(0), _selSizeY(0),
 	_selector(0), _blink(true),
 	_redColor(0), _yellowColor(0), _greenColor(0), _highContrast(true),
-	_cellColor(0), _selectorColor(0)
+	_cellColor(0), _selectorColor(0),
+	_selCraft(0)
 {
 	// Clear grid
 	for (int i = 0; i < BASE_SIZE; ++i)
@@ -96,6 +97,7 @@ void BaseView::setBase(Base *base)
 {
 	_base = base;
 	_selFacility = 0;
+	_selCraft = 0;		
 
 	// Clear grid
 	for (int x = 0; x < BASE_SIZE; ++x)
@@ -138,6 +140,15 @@ void BaseView::setTexture(SurfaceSet *texture)
 BaseFacility *BaseView::getSelectedFacility() const
 {
 	return _selFacility;
+}
+
+/**
+ * Returns the craft the mouse is currently over.
+ * @return Pointer to Craft facility (0 if none).
+ */
+Craft *BaseView::getSelectedCraft() const
+{
+	return _selCraft;
 }
 
 /**
@@ -483,7 +494,11 @@ void BaseView::draw()
 		}
 	}
 
-	auto craftIt = _base->getCrafts()->begin();
+	for (auto *craft : *_base->getCrafts())  // Reset 'assigned state' to crafts at base
+	{
+		craft->setIsAssignedToSlot(false);	
+		craft->setBaseEscapePosition(Position(-1,-1,-1)); // -1,-1,-1 is "craft not assigned"			
+	}	
 
 	for (const auto* fac : *_base->getFacilities())
 	{
@@ -571,21 +586,29 @@ void BaseView::draw()
 		}
 
 		// Draw crafts
-		fac->setCraftForDrawing(0);
+		fac->clearCraftsForDrawing(); 
 		if (fac->getBuildTime() == 0 && fac->getRules()->getCrafts() > 0)
 		{
-			if (craftIt != _base->getCrafts()->end())
-			{
-				if ((*craftIt)->getStatus() != "STR_OUT")
+			auto craftIt = _base->getCrafts()->begin();
+			for (const auto &p : fac->getRules()->getCraftSlots())
+			{			
+				while((craftIt != _base->getCrafts()->end()) && (((*craftIt)->getStatus() == "STR_OUT") ||  (*craftIt)->getIsAssignedToSlot() || (fac->getRules()->getHangarType() !=  (*craftIt)->getRules()->getHangarType())))
+						++craftIt;	
+				if ((craftIt != _base->getCrafts()->end()))
 				{
-					Surface *frame = _texture->getFrame((*craftIt)->getSkinSprite() + 33);
-					int fx = (fac->getX() * GRID_SIZE + (fac->getRules()->getSizeX() - 1) * GRID_SIZE / 2 + 2);
-					int fy = (fac->getY() * GRID_SIZE + (fac->getRules()->getSizeY() - 1) * GRID_SIZE / 2 - 4);
+					Surface *frame = _texture->getFrame((*craftIt)->getSkinSprite() + 33);		
+					int spriteWidthOffset= frame->getWidth()/2;  
+					int spriteHeightOffset= frame->getHeight()/2;	
+					int fx = (fac->getX() * GRID_SIZE) + ((fac->getRules()->getSizeX()) * GRID_SIZE) / 2.0 - spriteWidthOffset + p.x;
+					int fy = (fac->getY() * GRID_SIZE) + ((fac->getRules()->getSizeY()) * GRID_SIZE) / 2.0 + - spriteHeightOffset + p.y;	
+					(*craftIt)->setBaseEscapePosition(Position(fx,fy,0));					
 					frame->blitNShade(this, fx, fy);
-					fac->setCraftForDrawing(*craftIt);
+					fac->addCraftForDrawing(*craftIt);
+					(*craftIt)->setIsAssignedToSlot(true);
 				}
-				++craftIt;
-			}
+				else
+					break;
+			}	
 		}
 
 		// Draw time remaining
@@ -660,7 +683,19 @@ void BaseView::mouseOver(Action *action, State *state)
 	if (_gridX >= 0 && _gridX < BASE_SIZE && _gridY >= 0 && _gridY < BASE_SIZE)
 	{
 		_selFacility = _facilities[_gridX][_gridY];
-		if (_selSizeX > 0 && _selSizeY > 0)
+		if ((_selFacility != 0)  && !(_selFacility->getCraftsForDrawing().empty())){
+			    Position mousePos(action->getRelativeXMouse()/action->getXScale(),action->getRelativeYMouse()/action->getYScale(),0);
+				int dist=-1, newDist;
+				for (auto *craft : _selFacility->getCraftsForDrawing())
+				{
+					newDist = Position::distance2dSq(mousePos,craft->getBaseEscapePosition());
+					if(dist<0 || newDist <dist){
+						dist = newDist;
+						_selCraft = craft;
+					}
+				}
+		} 					
+		if (_selSize > 0)
 		{
 			if (_gridX + _selSizeX - 1 < BASE_SIZE && _gridY + _selSizeY - 1 < BASE_SIZE)
 			{
