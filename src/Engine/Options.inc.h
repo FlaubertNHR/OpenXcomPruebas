@@ -145,7 +145,7 @@ OPT bool oxceDisableTechTreeViewer;
 OPT int oxceTogglePersonalLightType;
 OPT int oxceToggleNightVisionType;
 OPT int oxceToggleBrightnessType;
-
+OPT int maxNumberOfBases;
 OPT bool oxceEnableUnitResponseSounds;
 OPT int oxceHiddenMovementBackgroundChangeFrequency;
 OPT bool oxceInventoryShowUnitSlot;
