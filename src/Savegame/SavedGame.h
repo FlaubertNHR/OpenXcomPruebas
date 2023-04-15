@@ -165,6 +165,7 @@ private:
 	std::vector<const RuleResearch*> _poppedResearch;
 	std::vector<Soldier*> _deadSoldiers;
 	size_t _selectedBase;
+	size_t _visibleBasesIndex;
 	std::string _lastselectedArmor; //contains the last selected armor
 	std::string _globalEquipmentLayoutName[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
 	std::string _globalEquipmentLayoutArmor[MAX_EQUIPMENT_LAYOUT_TEMPLATES];
@@ -263,6 +264,10 @@ public:
 	std::vector<Base*> *getBases();
 	/// Gets the list of bases.
 	const std::vector<Base*> *getBases() const;
+	// Gets the index of visible Bases
+	size_t getVisibleBasesIndex();
+	// Sets the index of visible Bases
+	void setVisibleBasesIndex(size_t lastVisibleBasesIndex);	
 	/// Gets the total base maintenance.
 	int getBaseMaintenance() const;
 	/// Gets the list of UFOs.

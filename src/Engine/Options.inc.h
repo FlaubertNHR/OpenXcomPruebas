@@ -159,7 +159,7 @@ OPT bool oxceDisableTechTreeViewer;
 OPT int oxceTogglePersonalLightType;
 OPT int oxceToggleNightVisionType;
 OPT int oxceToggleBrightnessType;
-
+OPT int maxNumberOfBases;
 OPT bool oxceShowBurningAsWounded;
 OPT bool oxceDisableInfoOnThrowCursor;
 OPT bool oxceSwapDontReselectActions;

@@ -575,6 +575,7 @@ void createControlsOXCE()
 void createOptionsOTHER()
 {
 	// your fork's hidden options here
+	_info.push_back(OptionInfo(OPTION_OXCE, "oxceMaxBases", &maxNumberOfBases, 8, "", "HIDDEN"));
 }
 
 void createAdvancedOptionsOTHER()
