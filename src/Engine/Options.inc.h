@@ -128,6 +128,7 @@ OPT bool oxceEnablePaletteFlickerFix;
 OPT bool oxceRecommendedOptionsWereSet;
 OPT std::string password;
 
+
 // OXCE hidden, but moddable via fixedUserOptions and/or recommendedUserOptions
 OPT int oxceStartUpTextMode;
 
@@ -147,6 +148,7 @@ OPT bool oxceBaseResearchReorder;
 OPT bool oxceBaseManufactureFallbackButton;
 OPT bool oxceBaseManufactureInfinityButton;
 OPT bool oxceBaseTouchButtons;
+OPT int maxNumberOfBases;
 
 OPT bool oxceDisableAlienInventory;
 OPT bool oxceDisableHitLog;
