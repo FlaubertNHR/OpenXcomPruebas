@@ -43,13 +43,12 @@ private:
 	TextButton *_btnOk, *_btnPsiTraining, *_btnTraining, *_btnMemorial;
 	Window *_window;
 	Text *_txtTitle, *_txtName, *_txtRank, *_txtCraft;
-	ComboBox *_cbxSortBy, *_cbxScreenActions, *_cbxFilterCraft;
+	ComboBox *_cbxSortBy, *_cbxScreenActions;
 	TextList *_lstSoldiers;
 	Base *_base;
 	std::vector<Soldier *> _origSoldierOrder, _filteredListOfSoldiers;
 	std::vector<int> _filteredIndicesOfSoldiers;
 	std::vector<SortFunctor *> _sortFunctors;
-	size_t selectedCraftIndex;
 	getStatFn_t _dynGetter;
 	std::vector<std::string> _availableOptions;
 	size_t _mainOffset;
@@ -62,8 +61,6 @@ public:
 	~SoldiersState();
 	/// Handler for changing the sort by combobox.
 	void cbxSortByChange(Action *action);
-	/// Handler for filtering by craft selected in combobox.
-	void cbxFilterCraftByChange(Action *action);	
 	/// Updates the soldier names.
 	void init() override;
 	/// Handler for clicking the Soldiers reordering button.
