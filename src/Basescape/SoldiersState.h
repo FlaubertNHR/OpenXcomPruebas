@@ -48,6 +48,7 @@ private:
 	Base *_base;
 	std::vector<Soldier *> _origSoldierOrder, _filteredListOfSoldiers;
 	std::vector<int> _filteredIndicesOfSoldiers;
+	std::vector<size_t> _baseIndexSoldiers;
 	std::vector<SortFunctor *> _sortFunctors;
 	getStatFn_t _dynGetter;
 	std::vector<std::string> _availableOptions;
