@@ -66,9 +66,9 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	// another button for craft selection; and a 3rd one for "Ok"
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	_btnOk = new TextButton(96, 16, 216, 176);
-	_cbxScreenActions = new ComboBox(this, 96, 16, 8, 176, true);
-	_cbxFilterByCraft = new ComboBox(this, 96, 16, 112, 176, true);	
+	_btnOk = new TextButton(64, 16, 248, 176);
+	_cbxScreenActions = new ComboBox(this, 128, 16, 8, 176, true);
+	_cbxFilterByCraft = new ComboBox(this, 96, 16, 144, 176, true);	
 	_txtTitle = new Text(168, 17, 16, 8);
 	_cbxSortBy = new ComboBox(this, 120, 16, 192, 8, false);
 	_txtName = new Text(114, 9, 16, 32);
@@ -136,8 +136,8 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 
 	// _cbxFilterByCraft
 	_craftOptions.clear();  // NHR: could be a std::string? defined here
-	_craftOptions.push_back("No Filter Craft");
-	_craftOptions.push_back("Not assigned");
+	_craftOptions.push_back("STR_NO_CRAFT_FILTER");
+	_craftOptions.push_back("STR_NOT_ASSIGNED");
 	for (size_t craft = 0; craft < _base->getCrafts()->size(); ++craft)
 	{
        _craftOptions.push_back( _base->getCrafts()->at(craft)->getName(_game->getLanguage()));
@@ -387,11 +387,13 @@ void SoldiersState::initList(size_t scrl)
 		RuleSoldierTransformation *transformationRule = _game->getMod()->getSoldierTransformation(selAction);
 		if (transformationRule)
 		{
-			int idx = -1;
 			for (auto* soldier : *_base->getSoldiers())
 			{
-				idx++;
-				if (soldier->getCraft() && soldier->getCraft()->getStatus() == "STR_OUT")
+if ((soldier->getCraft() && soldier->getCraft()->getStatus() == "STR_OUT") || 
+                  
+				    ((selectedCraftIndex  > 1) && soldier->getCraft() != _base->getCrafts()->at(selectedCraftIndex-2)) ||
+					
+					(selectedCraftIndex == 1 )  && soldier->getCraft())
 				{
 					// soldiers outside of the base are not eligible
 					continue;
