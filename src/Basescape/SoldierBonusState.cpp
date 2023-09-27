@@ -37,7 +37,7 @@
 
 namespace OpenXcom
 {
-
+typedef std::pair<std::string, std::vector<float> > RuleStatBonusDataOrig;
 /**
  * Initializes all the elements in the SoldierBonus window.
  * @param base Pointer to the base to get info from.
@@ -106,13 +106,14 @@ SoldierBonusState::SoldierBonusState(Base *base, size_t soldier) : _base(base), 
 	_lstSummary->setBackground(_window);
 	_lstSummary->setMargin(8);
 	_lstSummary->setVisible(false);
-
+    const std::vector<RuleStatBonusDataOrig>* _bonusOrig;
 	int visibilityAtDark = 0;
 	int visibilityAtDay = 0;
 	int psiVision = 0;
 	int heatVision = 0;
 
 	int frontArmor = 0, leftArmor = 0, rightArmor = 0, rearArmor = 0, underArmor = 0;
+	int TURecovery = 0, ENRecovery = 0, HPRecovery = 0, MNRecovery = 0, MRRecovery = 0, STRecovery = 0;
 	UnitStats stats;
 	bool timeRecovery = false, energyRecovery = false, moraleRecovery = false, healthRecovery = false, stunRecovery = false, manaRecovery = false;
 	for (auto* bonusRule : *s->getBonuses(nullptr))
@@ -135,6 +136,30 @@ SoldierBonusState::SoldierBonusState(Base *base, size_t soldier) : _base(base), 
 		healthRecovery = healthRecovery || bonusRule->getHealthRecoveryRaw()->isModded();
 		stunRecovery = stunRecovery || bonusRule->getStunRegenerationRaw()->isModded();
 		manaRecovery = manaRecovery || bonusRule->getManaRecoveryRaw()->isModded();
+		if(bonusRule->getEnergyRecoveryRaw()->isModded()){
+		    _bonusOrig = bonusRule->getEnergyRecoveryRaw()->getBonusRaw();
+		    ENRecovery+=(_bonusOrig->front().second).front();
+		}
+		if(bonusRule->getTimeRecoveryRaw()->isModded()){
+		    _bonusOrig = bonusRule->getTimeRecoveryRaw()->getBonusRaw();
+		    TURecovery+=(_bonusOrig->front().second).front();
+		}
+		if(bonusRule->getMoraleRecoveryRaw()->isModded()){
+		    _bonusOrig = bonusRule->getMoraleRecoveryRaw()->getBonusRaw();
+		     MRRecovery+=(_bonusOrig->front().second).front();
+		}
+		if(bonusRule->getHealthRecoveryRaw()->isModded()){
+		    _bonusOrig = bonusRule->getHealthRecoveryRaw()->getBonusRaw();
+		    HPRecovery+=(_bonusOrig->front().second).front();
+		}
+		if(bonusRule->getManaRecoveryRaw()->isModded()){
+		    _bonusOrig = bonusRule->getManaRecoveryRaw()->getBonusRaw();
+		    MNRecovery+=(_bonusOrig->front().second).front();
+		}
+		if(bonusRule->getStunRegenerationRaw()->isModded()){
+		    _bonusOrig = bonusRule->getStunRegenerationRaw()->getBonusRaw();
+		    STRecovery+=(_bonusOrig->front().second).front();
+		}
 	}
 	if (stats.tu != 0)
 		_lstSummary->addRow(2, tr("STR_TIME_UNITS").c_str(), std::to_string(stats.tu).c_str());
@@ -221,17 +246,17 @@ SoldierBonusState::SoldierBonusState(Base *base, size_t soldier) : _base(base), 
 		_lstSummary->addRow(1, "");
 		_lstSummary->addRow(1, tr("recovery").c_str());
 		if (timeRecovery)
-			_lstSummary->addRow(1, tr("time").c_str());
+			_lstSummary->addRow(2, tr("time").c_str(), std::to_string(TURecovery).c_str());
 		if (energyRecovery)
-			_lstSummary->addRow(1, tr("energy").c_str());
+			_lstSummary->addRow(2, tr("energy").c_str(), std::to_string(ENRecovery).c_str());
 		if (moraleRecovery)
-			_lstSummary->addRow(1, tr("morale").c_str());
+			_lstSummary->addRow(2, tr("morale").c_str(), std::to_string(MRRecovery).c_str());
 		if (healthRecovery)
-			_lstSummary->addRow(1, tr("health").c_str());
+			_lstSummary->addRow(2, tr("health").c_str(), std::to_string(HPRecovery).c_str());
 		if (stunRecovery)
-			_lstSummary->addRow(1, tr("stun").c_str());
+			_lstSummary->addRow(2, tr("stun").c_str(), std::to_string(STRecovery).c_str());
 		if (manaRecovery)
-			_lstSummary->addRow(1, tr("mana").c_str());
+			_lstSummary->addRow(2, tr("mana").c_str(), std::to_string(MNRecovery).c_str());
 	}
 }
 
