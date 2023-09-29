@@ -409,6 +409,7 @@ void SoldierInfoState::init()
 
 	bool hasBonus = _soldier->prepareStatsWithBonuses(_game->getMod()); // refresh all bonuses
 	UnitStats withArmor = *_soldier->getStatsWithAllBonuses();
+	UnitStats woutArmor = *_soldier->getStatsWithSoldierBonusesOnly();
 	_btnBonuses->setVisible(hasBonus);
 
 	SurfaceSet *texture = _game->getMod()->getSurfaceSet("BASEBITS.PCK");
@@ -459,16 +460,16 @@ void SoldierInfoState::init()
 		bar->setValue(withArmor2);
 		bar->setValue2(std::min(withArmor2, initial2));
 	};
-
-	formatStat(current->tu, max.tu, withArmor.tu, initial->tu, _numTimeUnits, _barTimeUnits);
-	formatStat(current->stamina, max.stamina, withArmor.stamina, initial->stamina, _numStamina, _barStamina);
-	formatStat(current->health, max.health, withArmor.health, initial->health, _numHealth, _barHealth);
-	formatStat(current->bravery, max.bravery, withArmor.bravery, initial->bravery, _numBravery, _barBravery);
-	formatStat(current->reactions, max.reactions, withArmor.reactions, initial->reactions, _numReactions, _barReactions);
-	formatStat(current->firing, max.firing, withArmor.firing, initial->firing, _numFiring, _barFiring);
-	formatStat(current->throwing, max.throwing, withArmor.throwing, initial->throwing, _numThrowing, _barThrowing);
-	formatStat(current->melee, max.melee, withArmor.melee, initial->melee, _numMelee, _barMelee);
-	formatStat(current->strength, max.strength, withArmor.strength, initial->strength, _numStrength, _barStrength);
+    int realCurrentHealthwArmor = std::max(0, withArmor.health - _soldier->getWoundRecoveryInt() - _soldier->getHealthMissing());
+	formatStat(woutArmor.tu, max.tu, withArmor.tu, initial->tu, _numTimeUnits, _barTimeUnits);
+	formatStat(woutArmor.stamina, max.stamina, withArmor.stamina, initial->stamina, _numStamina, _barStamina);	
+	formatStat(woutArmor.health, max.health, realCurrentHealthwArmor, initial->health, _numHealth, _barHealth);
+	formatStat(woutArmor.bravery, max.bravery, withArmor.bravery, initial->bravery, _numBravery, _barBravery);
+	formatStat(woutArmor.reactions, max.reactions, withArmor.reactions, initial->reactions, _numReactions, _barReactions);
+	formatStat(woutArmor.firing, max.firing, withArmor.firing, initial->firing, _numFiring, _barFiring);
+	formatStat(woutArmor.throwing, max.throwing, withArmor.throwing, initial->throwing, _numThrowing, _barThrowing);
+	formatStat(woutArmor.melee, max.melee, withArmor.melee, initial->melee, _numMelee, _barMelee);
+	formatStat(woutArmor.strength, max.strength, withArmor.strength, initial->strength, _numStrength, _barStrength);
 
 	std::string wsArmor;
 	if (_soldier->getArmor() == _soldier->getRules()->getDefaultArmor())
@@ -545,7 +546,7 @@ void SoldierInfoState::init()
 	{
 		if (_game->getSavedGame()->isManaUnlocked(_game->getMod()))
 		{
-			formatStat(current->mana, max.mana, withArmor.mana, initial->mana, _numMana, _barMana);
+			formatStat(woutArmor.mana, max.mana, withArmor.mana-_soldier->getManaMissing(), initial->mana, _numMana, _barMana);
 
 			_txtMana->setVisible(true);
 			_numMana->setVisible(true);
@@ -561,7 +562,7 @@ void SoldierInfoState::init()
 
 	if (current->psiSkill > 0 || (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
 	{
-		formatStat(current->psiStrength, max.psiStrength, withArmor.psiStrength, initial->psiStrength, _numPsiStrength, _barPsiStrength);
+		formatStat(woutArmor.psiStrength, max.psiStrength, withArmor.psiStrength, initial->psiStrength, _numPsiStrength, _barPsiStrength);
 
 		_txtPsiStrength->setVisible(true);
 		_numPsiStrength->setVisible(true);
@@ -576,7 +577,7 @@ void SoldierInfoState::init()
 
 	if (current->psiSkill > 0)
 	{
-		formatStat(current->psiSkill, max.psiSkill, withArmor.psiSkill, initial->psiSkill, _numPsiSkill, _barPsiSkill);
+		formatStat(woutArmor.psiSkill, max.psiSkill, withArmor.psiSkill, initial->psiSkill, _numPsiSkill, _barPsiSkill);
 
 		_txtPsiSkill->setVisible(true);
 		_numPsiSkill->setVisible(true);
