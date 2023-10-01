@@ -501,6 +501,9 @@ en-US:
 #TrainingFinishedState.cpp
   STR_TRAINING_FINISHED: "Training Finished{NEWLINE}at {0}"
   STR_PSI_TRAINING_FINISHED: "Psi Training Finished{NEWLINE}at {0}"
+#RecoveryFinishedState.cpp
+  STR_WOUNDS_RECOVERY_FINISHED: "Wounds Recovered{NEWLINE}at {0}"
+  STR_MANA_RECOVERY_FINISHED: "Mana Recovered{NEWLINE}at {0}"
 #UfoDetectedState.cpp
   STR_IGNORE_UC: "IGNORE"
 #UfoTrackerState.cpp

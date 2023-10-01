@@ -97,6 +97,7 @@
 #include "NewPossibleCraftState.h"
 #include "NewPossibleFacilityState.h"
 #include "TrainingFinishedState.h"
+#include "StatsRecoveryFinishedState.h"
 #include "../Savegame/Production.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Savegame/ItemContainer.h"
@@ -2576,10 +2577,21 @@ void GeoscapeState::time1Day()
 		// Handle soldier wounds and martial training
 		BaseSumDailyRecovery recovery = xbase->getSumRecoveryPerDay();
 		std::vector<Soldier *> trainingFinishedList;
+		std::vector<Soldier *> HPRecoveredList;
+		std::vector<Soldier *> ManaRecoveredList;		
 		for (auto* soldier : *xbase->getSoldiers())
 		{
+			bool wasNotPsiFull = soldier->getManaMissing() > 0;
+			bool wasWounded = (soldier->getHealthMissing() > 0) || (soldier->getWoundRecoveryInt() > 0);
 			soldier->replenishStats(recovery);
-
+			if(wasNotPsiFull && (soldier->getManaMissing() == 0))
+			{
+				ManaRecoveredList.push_back(soldier);				
+			}
+			if(wasWounded && (soldier->getHealthMissing() == 0) && (soldier->getWoundRecoveryInt()==0))
+			{		
+				HPRecoveredList.push_back(soldier);
+			}
 			if (soldier->isInTraining())
 			{
 				soldier->trainPhys(_game->getMod()->getCustomTrainingFactor());
@@ -2602,6 +2614,14 @@ void GeoscapeState::time1Day()
 					soldier->setReturnToTrainingWhenHealed(false);
 				}
 			}
+		}
+		if (!HPRecoveredList.empty())
+		{
+			popup(new StatsRecoveryFinishedState(xbase, HPRecoveredList, false));
+		}
+		if (!ManaRecoveredList.empty())
+		{
+			popup(new StatsRecoveryFinishedState(xbase, ManaRecoveredList, true));
 		}
 		if (!trainingFinishedList.empty())
 		{

@@ -608,6 +608,19 @@ interfaces:
         color: 138   # yellow
       - id: button
         color: 133   # minty green
+  - type: recoveryFinished
+    backgroundImage: BACK02.SCR
+    elements:
+      - id: palette
+        color: 3     # 
+      - id: window
+        color: 239   # bright green
+      - id: text1
+        color: 239   # bright green
+      - id: text2
+        color: 138   # yellow
+      - id: button
+        color: 133   # minty green        
   - type: geoNewCraft
     backgroundImage: BACK13.SCR
     elements:
