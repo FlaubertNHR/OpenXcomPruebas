@@ -38,7 +38,7 @@ namespace OpenXcom
 RuleBaseFacility::RuleBaseFacility(const std::string &type, int listOrder) :
 	_type(type), _spriteShape(-1), _spriteFacility(-1), _connectorsDisabled(false),
 	_missileAttraction(100), _fakeUnderwater(-1),
-	_lift(false), _hyper(false), _mind(false), _grav(false), _mindPower(1),
+	_lift(false), _hyper(false), _mind(false), _grav(false), _smallCraftsOnly(false), _mindPower(1),
 	_sizeX(1), _sizeY(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0),
 	_storage(0), _personnel(0), _aliens(0), _crafts(0), _labs(0), _workshops(0), _psiLabs(0),
 	_spriteEnabled(false),
@@ -85,6 +85,7 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod)
 	_hyper = node["hyper"].as<bool>(_hyper);
 	_mind = node["mind"].as<bool>(_mind);
 	_grav = node["grav"].as<bool>(_grav);
+	_smallCraftsOnly = node["smallCraftsOnly"].as<bool>(_smallCraftsOnly);	
 	_mindPower = node["mindPower"].as<int>(_mindPower);
 	if (node["size"])
 	{
@@ -173,6 +174,7 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod)
 	std::sort(_buildOverFacilities.begin(), _buildOverFacilities.end());
 
 	_storageTiles = node["storageTiles"].as<std::vector<Position> >(_storageTiles);
+	_craftSlots = node["craftSlots"].as<std::vector<Position> >(_craftSlots);	
 	_destroyedFacilityName = node["destroyedFacility"].as<std::string>(_destroyedFacilityName);
 }
 
@@ -254,6 +256,15 @@ void RuleBaseFacility::afterLoad(const Mod* mod)
 				}
 			}
 		}
+	}
+
+	if (((_crafts > 1) && (_craftSlots.size() != _crafts)) || ((_crafts == 1) && (_craftSlots.size() > 1))){
+		printf("Naves:%d vectores:%d\n",_crafts,_craftSlots.size());
+		throw Exception("Not enough position vectors for crafts allocation.");
+	}
+
+	if (_craftSlots.empty()){ // NHR_ Si hay una sola nave y no se indica una posición, se asume que es el centro
+		_craftSlots.push_back(Position()); // punto 0,0,0
 	}
 
 	Collections::removeAll(_leavesBehindOnSellNames);
@@ -382,6 +393,15 @@ int RuleBaseFacility::getMindShieldPower() const
 bool RuleBaseFacility::isGravShield() const
 {
 	return _grav;
+}
+
+/**
+ * Checks if this facility can contain only small crafts
+ * @return True if it only can contain small crafts
+ */
+bool RuleBaseFacility::smallCraftsOnly() const
+{
+	return _smallCraftsOnly;
 }
 
 /**
@@ -678,6 +698,16 @@ BasePlacementErrors RuleBaseFacility::getCanBuildOverOtherFacility(const RuleBas
 const std::vector<Position> &RuleBaseFacility::getStorageTiles() const
 {
 	return _storageTiles;
+}
+
+/**
+ * Gets the list of positions where to place craft sprites overthis facility's sprite
+ * If empty, craft sprite will be at the center of the facility sprute
+ * @return the list of positions
+ */
+const std::vector<Position> &RuleBaseFacility::getCraftSlots() const
+{
+	return _craftSlots;
 }
 
 /*

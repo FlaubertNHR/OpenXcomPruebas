@@ -39,7 +39,7 @@ RuleCraft::RuleCraft(const std::string &type, int listOrder) :
 	_maxSmallUnits(-1), _maxLargeUnits(-1), _maxSoldiers(-1), _maxVehicles(-1),
 	_monthlyBuyLimit(0), _costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
 	_transferTime(24), _score(0), _battlescapeTerrainData(0), _maxSkinIndex(0),
-	_keepCraftAfterFailedMission(false), _allowLanding(true), _spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _undetectable(false),
+	_keepCraftAfterFailedMission(false), _allowLanding(true), _spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _undetectable(false),  _isSmallCraft(false),
 	_listOrder(listOrder), _maxAltitude(-1), _defaultAltitude("STR_VERY_LOW"), _onlyOneSoldierGroupAllowed(false), _stats(),
 	_shieldRechargeAtBase(1000),
 	_mapVisible(true), _forceShowInMonthlyCosts(false), _useAllStartTiles(false)
@@ -152,6 +152,7 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, const ModScript &parsers)
 	_notifyWhenRefueled = node["notifyWhenRefueled"].as<bool>(_notifyWhenRefueled);
 	_autoPatrol = node["autoPatrol"].as<bool>(_autoPatrol);
 	_undetectable = node["undetectable"].as<bool>(_undetectable);
+	_isSmallCraft = node["isSmallCraft"].as<bool>(_isSmallCraft);		
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	_maxAltitude = node["maxAltitude"].as<int>(_maxAltitude);
 	_defaultAltitude = node["defaultAltitude"].as<std::string>(_defaultAltitude);

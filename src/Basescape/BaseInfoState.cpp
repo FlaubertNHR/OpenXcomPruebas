@@ -390,7 +390,8 @@ void BaseInfoState::init()
 	}
 
 	std::ostringstream ss8;
-	ss8 << _base->getUsedHangars() << ":" << _base->getAvailableHangars();
+	ss8 << (_base->getUsedHangars() -_base->getUsedBigSlots()) << ":" << (_base->getAvailableHangars()-_base->getAvailableBigSlots())
+	     << "  " << _base->getUsedBigSlots() << ":" << _base->getAvailableBigSlots();
 	_numHangars->setText(ss8.str());
 
 	_barHangars->setMax(_base->getAvailableHangars());

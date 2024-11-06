@@ -213,8 +213,14 @@ public:
 	int getAvailableWorkshops() const;
 	/// Gets the base's used hangars.
 	int getUsedHangars() const;
+	/// Gets the base's used big slots at hangars.
+	int getUsedBigSlots() const;	
+	/// Gets the base's used big slots at hangars, if some new small crafts where added.
+	int getUsedBigSlots(int newSmallCrafts) const;			
 	/// Gets the base's available hangars.
 	int getAvailableHangars() const;
+	/// Gets the base's available big slots at hangars.
+	int getAvailableBigSlots() const;		
 	/// Get the number of available space lab (not used by a ResearchProject)
 	int getFreeLaboratories() const;
 	/// Get the number of available space lab (not used by a Production)

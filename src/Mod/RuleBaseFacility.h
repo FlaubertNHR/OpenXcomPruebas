@@ -52,7 +52,7 @@ private:
 	bool _connectorsDisabled;
 	int _missileAttraction;
 	int _fakeUnderwater;
-	bool _lift, _hyper, _mind, _grav;
+	bool _lift, _hyper, _mind, _grav, _smallCraftsOnly;
 	int _mindPower;
 	int _sizeX, _sizeY;
 	int _buildCost, _refundValue, _buildTime, _monthlyCost;
@@ -79,6 +79,7 @@ private:
 	bool _canBeBuiltOver;
 	std::vector<const RuleBaseFacility*> _buildOverFacilities;
 	std::vector<Position> _storageTiles;
+	std::vector<Position> _craftSlots;		
 	std::string _destroyedFacilityName;
 	const RuleBaseFacility* _destroyedFacility;
 
@@ -135,6 +136,8 @@ public:
 	int getMindShieldPower() const;
 	/// Gets if the facility is a grav shield.
 	bool isGravShield() const;
+	/// Gets if the facility can contain only small Crafts.
+	bool smallCraftsOnly() const;		
 	/// Gets the facility's construction cost.
 	int getBuildCost() const;
 	/// Gets the facility's refund value.
@@ -219,6 +222,8 @@ public:
 	const std::vector<const RuleBaseFacility*> &getBuildOverFacilities() const { return _buildOverFacilities; }
 	/// Gets a list of which tiles are used to place items stored in this facility
 	const std::vector<Position> &getStorageTiles() const;
+	/// Gets a list of relative positions to place crafts over the facility sprite
+	const std::vector<Position> &getCraftSlots() const;		
 	/// Gets the ruleset for the destroyed version of this facility.
 	const RuleBaseFacility* getDestroyedFacility() const;
 };

@@ -149,6 +149,14 @@ void BaseView::resetSelectedFacility()
 	_selFacility = 0;
 }
 
+/**
+ * Returns the Craft the mouse is currently over.
+ * @return Pointer to Craft facility (0 if none).
+ */
+Craft *BaseView::getSelectedCraft() const
+{
+	return _selCraft;
+}
 
 /**
  * Returns the X position of the grid square
@@ -483,7 +491,11 @@ void BaseView::draw()
 		}
 	}
 
-	auto craftIt = _base->getCrafts()->begin();
+	for (auto *craft : *_base->getCrafts())
+	{
+		craft->setIsAssignedToSlot(false);
+		craft->setBaseEscapePosition(Position(-1,-1,-1)); //NHR: -1,-1,-1 es la posicion para "nave no asignada"
+	}
 
 	for (const auto* fac : *_base->getFacilities())
 	{
@@ -571,20 +583,26 @@ void BaseView::draw()
 		}
 
 		// Draw crafts
-		fac->setCraftForDrawing(0);
+		fac->clearCraftsForDrawing(); 
 		if (fac->getBuildTime() == 0 && fac->getRules()->getCrafts() > 0)
 		{
-			if (craftIt != _base->getCrafts()->end())
+			auto craftIt = _base->getCrafts()->begin();
+			for (const auto &p : fac->getRules()->getCraftSlots())
 			{
-				if ((*craftIt)->getStatus() != "STR_OUT")
+				while((craftIt != _base->getCrafts()->end()) && ((*craftIt)->getIsAssignedToSlot() || (fac->getRules()->smallCraftsOnly() && !(*craftIt)->getRules()->isSmallCraft())))
+						++craftIt;
+				if ((craftIt != _base->getCrafts()->end()))
 				{
 					Surface *frame = _texture->getFrame((*craftIt)->getSkinSprite() + 33);
-					int fx = (fac->getX() * GRID_SIZE + (fac->getRules()->getSizeX() - 1) * GRID_SIZE / 2 + 2);
-					int fy = (fac->getY() * GRID_SIZE + (fac->getRules()->getSizeY() - 1) * GRID_SIZE / 2 - 4);
+					int fx = (fac->getX() * GRID_SIZE + (fac->getRules()->getSizeX() - 1) * GRID_SIZE / 2) + p.x;
+					int fy = (fac->getY() * GRID_SIZE + (fac->getRules()->getSizeY() - 1) * GRID_SIZE / 2) + p.y;
+					(*craftIt)->setBaseEscapePosition(Position(fx,fy,0));
 					frame->blitNShade(this, fx, fy);
-					fac->setCraftForDrawing(*craftIt);
+					fac->addCraftForDrawing(*craftIt);
+					(*craftIt)->setIsAssignedToSlot(true);
 				}
-				++craftIt;
+				else
+					break;
 			}
 		}
 
@@ -660,6 +678,22 @@ void BaseView::mouseOver(Action *action, State *state)
 	if (_gridX >= 0 && _gridX < BASE_SIZE && _gridY >= 0 && _gridY < BASE_SIZE)
 	{
 		_selFacility = _facilities[_gridX][_gridY];
+		if ((_selFacility != 0)  && !(_selFacility->getCraftsForDrawing().empty())){
+			    Position mousePos(action->getRelativeXMouse()/action->getXScale(),action->getRelativeYMouse()/action->getYScale(),0);
+				//printf("Mouse Pos %d,%d \n", mousePos.x,mousePos.y);
+				// NHR: Determina el "nº de vector mas cercano" al punto
+				int dist=-1, newDist;
+				for (auto *craft : _selFacility->getCraftsForDrawing())
+				{
+					//printf("Craft Pos %d,%d \n", craft->getBaseEscapePosition().x,craft->getBaseEscapePosition().y);
+					newDist = Position::distance2dSq(mousePos,craft->getBaseEscapePosition());
+					if(dist<0 || newDist <dist){
+						dist = newDist;
+						_selCraft = craft;
+						//printf("Sel craft: %s, Dist: %d \n",craft->getType().c_str(),dist);
+					}
+				}
+		} 		
 		if (_selSizeX > 0 && _selSizeY > 0)
 		{
 			if (_gridX + _selSizeX - 1 < BASE_SIZE && _gridY + _selSizeY - 1 < BASE_SIZE)

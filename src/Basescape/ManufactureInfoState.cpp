@@ -490,7 +490,12 @@ void ManufactureInfoState::lessEngineerClick(Action *action)
 void ManufactureInfoState::moreUnit(int change)
 {
 	if (change <= 0) return;
-	if (_production->getRules()->getProducedCraft() && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
+	if (_production->getRules()->getProducedCraft() && _production->getRules()->getProducedCraft()->isSmallCraft() && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
+	{
+		_timerMoreUnit->stop();
+		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+	}
+	else if (_production->getRules()->getProducedCraft() && !(_production->getRules()->getProducedCraft()->isSmallCraft()) && _base->getAvailableBigSlots() - _base->getUsedBigSlots() <= 0)
 	{
 		_timerMoreUnit->stop();
 		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
@@ -503,8 +508,10 @@ void ManufactureInfoState::moreUnit(int change)
 			--change; // e.g. jump from 1 to 10, not to 11
 		}
 		change = std::min(INT_MAX - units, change);
-		if (_production->getRules()->getProducedCraft())
+		if (_production->getRules()->getProducedCraft() && _production->getRules()->getProducedCraft()->isSmallCraft())
 			change = std::min(_base->getAvailableHangars() - _base->getUsedHangars(), change);
+		else if (_production->getRules()->getProducedCraft() && !(_production->getRules()->getProducedCraft()->isSmallCraft()))
+			change = std::min(_base->getAvailableBigSlots() - _base->getUsedBigSlots(), change);
 		_production->setAmountTotal(units+change);
 		setAssignedEngineer();
 	}

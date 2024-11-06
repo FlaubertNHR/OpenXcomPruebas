@@ -337,7 +337,10 @@ void PlaceFacilityState::viewClick(Action *)
 				int reducedBuildTimeRounded = (int)std::round(reducedBuildTime);
 				fac->setBuildTime(std::max(1, fac->getBuildTime() - reducedBuildTimeRounded));
 			}
-			_base->getFacilities()->push_back(fac);
+			if (fac->getRules()->smallCraftsOnly())
+				_base->getFacilities()->insert(_base->getFacilities()->begin(), fac);
+			else
+				_base->getFacilities()->push_back(fac);	
 			if (fac->getRules()->getPlaceSound() != Mod::NO_SOUND)
 			{
 				_game->getMod()->getSound("GEO.CAT", fac->getRules()->getPlaceSound())->play();

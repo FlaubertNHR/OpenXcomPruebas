@@ -1001,6 +1001,61 @@ int Base::getUsedHangars() const
 }
 
 /**
+ * Returns the amount of big hangars used up
+ * by crafts in the base.
+ * @return Number of big hangars.
+ */
+int Base::getUsedBigSlots() const
+{
+	size_t total = getUsedBigSlots(0);
+	return total;
+}
+
+/**
+ * Returns the amount of big hangars used up
+ * by crafts in the base if some new smallCrafts where added
+ * @return Number of big hangars.
+ */
+int Base::getUsedBigSlots(int newSmallCrafts) const
+{
+	size_t totalSmallCrafts = newSmallCrafts;
+	size_t totalSmallSlots = 0;
+	size_t total = _crafts.size() + newSmallCrafts;
+
+	for (auto *craft : _crafts)
+		if (craft->getRules()->isSmallCraft())
+			totalSmallCrafts++;
+
+	for (auto *fac : _facilities)
+		if (fac->getRules()->smallCraftsOnly() && fac->getBuildTime() == 0)
+			totalSmallSlots += fac->getRules()->getCrafts();
+
+	for (auto *transfer : _transfers)
+	{
+		if (transfer->getType() == TRANSFER_CRAFT)
+		{
+			total += transfer->getQuantity();
+			if (transfer->getCraft()->getRules()->isSmallCraft())
+				totalSmallCrafts += transfer->getQuantity();
+		}
+	}
+	for (const auto *prod : _productions)
+	{
+		if (prod->getRules()->getProducedCraft())
+		{
+			// This should be fixed on the case when prod->getInfiniteAmount() == TRUE
+			total += (prod->getAmountTotal() - prod->getAmountProduced());
+			if (prod->getRules()->getProducedCraft()->isSmallCraft())
+				totalSmallCrafts += (prod->getAmountTotal() - prod->getAmountProduced());
+		}
+	}
+	if (totalSmallCrafts <= totalSmallSlots)
+		return (total - totalSmallCrafts);
+	else
+		return (total - totalSmallSlots);
+}
+
+/**
  * Returns the total amount of hangars
  * available in the base.
  * @return Number of hangars.
@@ -1011,6 +1066,24 @@ int Base::getAvailableHangars() const
 	for (const auto* fac : _facilities)
 	{
 		if (fac->getBuildTime() == 0)
+		{
+			total += fac->getRules()->getCrafts();
+		}
+	}
+	return total;
+}
+
+/**
+ * Returns the total amount of big slots in hangars
+ * available in the base.
+ * @return Number of big slots.
+ */
+int Base::getAvailableBigSlots() const
+{
+	int total = 0;
+	for (const auto *fac : _facilities)
+	{
+		if ((fac->getBuildTime() == 0) && !(fac->getRules()->smallCraftsOnly()))
 		{
 			total += fac->getRules()->getCrafts();
 		}
@@ -1746,11 +1819,11 @@ int Base::damageFacility(BaseFacility *toBeDamaged)
 		fac->setBuildTime(0);
 		_facilities.push_back(fac);
 
-		// move the craft from the original hangar to the damaged hangar
+		// move the craft vector from the original hangar to the damaged hangar
 		if (fac->getRules()->getCrafts() > 0)
 		{
-			fac->setCraftForDrawing(toBeDamaged->getCraftForDrawing());
-			toBeDamaged->setCraftForDrawing(0);
+			fac->setCraftsForDrawing(toBeDamaged->getCraftsForDrawing());
+			toBeDamaged->clearCraftsForDrawing();
 		}
 	}
 	else if (_mod->getDestroyedFacility())
@@ -1896,35 +1969,91 @@ void Base::destroyFacility(BASEFACILITIESITERATOR facility)
 	{
 		// hangar destruction - destroy crafts and any production of crafts
 		// if this will mean there is no hangar to contain it
-		if ((*facility)->getCraftForDrawing())
+		if (!((*facility)->getCraftsForDrawing().empty()))  // There are crafts in hangar
 		{
-			// remove all soldiers
-			for (Soldier *s : _soldiers)
-			{
-				if (s->getCraft() == (*facility)->getCraftForDrawing())
+			for(Craft *craft : (*facility)->getCraftsForDrawing())
+			{ // Consider ALL crafts in hangar
+				for (Soldier *s : _soldiers)
 				{
-					s->setCraft(0);
+					if (s->getCraft() == craft)
+					{
+						s->setCraft(0);
+					}
 				}
-			}
 
-			// remove all items
-			while (!(*facility)->getCraftForDrawing()->getItems()->getContents()->empty())
-			{
-				auto i = (*facility)->getCraftForDrawing()->getItems()->getContents()->begin();
-				_items->addItem(i->first, i->second);
-				(*facility)->getCraftForDrawing()->getItems()->removeItem(i->first, i->second);
-			}
-			Collections::deleteIf(_crafts, 1,
-				[&](Craft* c)
+				// remove all items
+				while (!craft->getItems()->getContents()->empty())
 				{
-					return c == (*facility)->getCraftForDrawing();
+					auto i = craft->getItems()->getContents()->begin();
+					_items->addItem(i->first, i->second);
+					craft->getItems()->removeItem(i->first, i->second);
 				}
-			);
+				Collections::deleteIf(_crafts, 1,
+					[&](Craft* c)
+					{
+						return c == craft;
+					}
+				);
+			}
 		}
 		else
 		{
-			int remove = -(getAvailableHangars() - getUsedHangars() - (*facility)->getRules()->getCrafts());
-			remove = Collections::deleteIf(_productions, remove,
+			// Removal is different now if hangar is "smallCraftsOnly" or "any craft"
+			if ((*facility)->getRules()->smallCraftsOnly())
+			{  // Hangar destroyed is "smallCraftsOnly" --> affects smallCrafts
+			    // Quantity of space to free due to destruction; smallCrafts can allocate in ANY slot (big & small)
+				int remove = -(getAvailableHangars() - getUsedHangars() - (*facility)->getRules()->getCrafts());
+				remove = Collections::deleteIf(_productions, remove,
+				[&](Production* i)
+				{   // Remove only SMALL crafts in production (big crafts are not affected by small hangar destruction)
+					if (i->getRules()->getProducedCraft() && i->getRules()->getProducedCraft()->isSmallCraft())
+					{
+						_engineers += i->getAssignedEngineers();
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				);
+				// Small hangar destructions should only affect transfers of small crafts
+				remove = Collections::deleteIf(_transfers, remove,
+				[&](Transfer* i)
+				{
+					return ((i->getType() == TRANSFER_CRAFT) && i->getCraft()->getRules()->isSmallCraft());
+				}
+				);
+			}
+			else
+			{  // Destroyed hangar can allocate any craft (has BIG slots)
+			    // Compute how much big (or small) crafts should be removed
+				int remove = -(getAvailableBigSlots()- getUsedBigSlots() - (*facility)->getRules()->getCrafts());
+				// We should attempt to remove big crafts transferred or in production; otherwise, we could destroy a 
+				// small craft which could be allocate in another small hangar (and big craft won't allocate there!) 
+				remove = Collections::deleteIf(_productions, remove,
+				[&](Production* i)
+				{
+					if (i->getRules()->getProducedCraft() && !(i->getRules()->getProducedCraft()->isSmallCraft()))
+					{
+						_engineers += i->getAssignedEngineers(); 
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				);
+				remove = Collections::deleteIf(_transfers, remove,
+				[&](Transfer* i)
+				{
+					return ((i->getType() == TRANSFER_CRAFT) && !(i->getCraft()->getRules()->isSmallCraft()));
+				}
+				);	
+				// If any aditional removal needed, we attempt to remove small (any) craft, as small craft can allocate also in
+				// big slots
+				remove = Collections::deleteIf(_productions, remove,
 				[&](Production* i)
 				{
 					if (i->getRules()->getProducedCraft())
@@ -1937,13 +2066,14 @@ void Base::destroyFacility(BASEFACILITIESITERATOR facility)
 						return false;
 					}
 				}
-			);
-			remove = Collections::deleteIf(_transfers, remove,
-				[&](Transfer* i)
-				{
-					return i->getType() == TRANSFER_CRAFT;
-				}
-			);
+				);
+				remove = Collections::deleteIf(_transfers, remove,
+					[&](Transfer* i)
+					{
+						return (i->getType() == TRANSFER_CRAFT);
+					}
+				);
+			}
 		}
 	}
 	if ((*facility)->getRules()->getPsiLaboratories() > 0)
@@ -2547,17 +2677,21 @@ std::vector<Craft*>::iterator Base::removeCraft(Craft *craft, bool unload)
 		craft->unload();
 	}
 
-	// Clear hangar
+	// Clear slot in hangar containing craft
 	for (auto* fac : _facilities)
 	{
-		if (fac->getCraftForDrawing() == craft)
-		{
-			fac->setCraftForDrawing(0);
-			break;
+
+		for(Craft *fCraft : fac->getCraftsForDrawing()){ // Now, we consider a vector of crafts at the hangar facility
+			if (fCraft == craft) 
+			{
+				fac->delCraftForDrawing(fCraft); // If craft is at the hangar, it is deleted 
+				fac=*(_facilities.end()); // Craft has been found; no more search at facilities
+				break;
+			}
 		}
 	}
 
-	// Remove craft
+	// Remove craft from base vector
 	std::vector<Craft*>::iterator c;
 	for (c = _crafts.begin(); c != _crafts.end(); ++c)
 	{

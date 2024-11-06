@@ -239,7 +239,11 @@ void ManufactureStartState::btnCancelClick(Action *)
  */
 void ManufactureStartState::btnStartClick(Action *)
 {
-	if (_item->getProducedCraft() && _base->getAvailableHangars() - _base->getUsedHangars() <= 0)
+	if ((_item->getProducedCraft() && (_item->getProducedCraft()->isSmallCraft()))&& _base->getAvailableHangars() - _base->getUsedHangars() <= 0)  // NHR: Cambiar la condición
+	{
+		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
+	}
+	else if((_item->getProducedCraft() && !(_item->getProducedCraft()->isSmallCraft()))&& _base->getAvailableBigSlots() - _base->getUsedBigSlots() <= 0) 
 	{
 		_game->pushState(new ErrorMessageState(tr("STR_NO_FREE_HANGARS_FOR_CRAFT_PRODUCTION"), _palette, _game->getMod()->getInterface("basescape")->getElement("errorMessage")->color, "BACK17.SCR", _game->getMod()->getInterface("basescape")->getElement("errorPalette")->color));
 	}
