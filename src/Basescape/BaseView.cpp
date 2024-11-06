@@ -598,8 +598,8 @@ void BaseView::draw()
 					Surface *frame = _texture->getFrame((*craftIt)->getSkinSprite() + 33);
 					int spriteWidthOffset= frame->getWidth()/2;  
 					int spriteHeightOffset= frame->getHeight()/2;	
-					int fx = (fac->getX() * GRID_SIZE) + ((fac->getRules()->getSize()) * GRID_SIZE) / 2.0 - spriteWidthOffset + p.x;
-					int fy = (fac->getY() * GRID_SIZE) + ((fac->getRules()->getSize()) * GRID_SIZE) / 2.0 + - spriteHeightOffset + p.y;	
+					int fx = (fac->getX() * GRID_SIZE) + ((fac->getRules()->getSizeX()) * GRID_SIZE) / 2.0 - spriteWidthOffset + p.x;
+					int fy = (fac->getY() * GRID_SIZE) + ((fac->getRules()->getSizeY()) * GRID_SIZE) / 2.0 + - spriteHeightOffset + p.y;	
 					(*craftIt)->setBaseEscapePosition(Position(fx,fy,0));					
 					frame->blitNShade(this, fx, fy);
 					fac->addCraftForDrawing(*craftIt);

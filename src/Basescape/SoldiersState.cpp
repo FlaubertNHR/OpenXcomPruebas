@@ -387,11 +387,13 @@ void SoldiersState::initList(size_t scrl)
 		RuleSoldierTransformation *transformationRule = _game->getMod()->getSoldierTransformation(selAction);
 		if (transformationRule)
 		{
+			int idx = -1;	
 			for (auto* soldier : *_base->getSoldiers())
 			{
-if ((soldier->getCraft() && soldier->getCraft()->getStatus() == "STR_OUT") || 
+				idx++;
+				if ((soldier->getCraft() && soldier->getCraft()->getStatus() == "STR_OUT") || 
                   
-				    ((selectedCraftIndex  > 1) && soldier->getCraft() != _base->getCrafts()->at(selectedCraftIndex-2)) ||
+				    ((selectedCraftIndex  > 1) && (soldier->getCraft() != _base->getCrafts()->at(selectedCraftIndex-2))) ||
 					
 					(selectedCraftIndex == 1 )  && soldier->getCraft())
 				{

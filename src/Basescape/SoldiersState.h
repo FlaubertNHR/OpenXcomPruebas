@@ -43,7 +43,7 @@ private:
 	TextButton *_btnOk, *_btnPsiTraining, *_btnTraining, *_btnMemorial;
 	Window *_window;
 	Text *_txtTitle, *_txtName, *_txtRank, *_txtCraft;
-	ComboBox *_cbxSortBy, *_cbxScreenActions;
+	ComboBox *_cbxSortBy, *_cbxScreenActions, *_cbxFilterByCraft;
 	TextList *_lstSoldiers;
 	Base *_base;
 	std::vector<Soldier *> _origSoldierOrder, _filteredListOfSoldiers;
@@ -51,7 +51,8 @@ private:
 	std::vector<size_t> _baseIndexSoldiers;
 	std::vector<SortFunctor *> _sortFunctors;
 	getStatFn_t _dynGetter;
-	std::vector<std::string> _availableOptions;
+	size_t selectedCraftIndex;		
+	std::vector<std::string> _availableOptions, _craftOptions;
 	///initializes the display list based on the craft soldier's list and the position to display
 	void initList(size_t scrl);
 public:
@@ -80,6 +81,8 @@ public:
 	void btnMemorialClick(Action *action);
 	/// Handler for changing the screen actions combo box.
 	void cbxScreenActionsChange(Action *action);
+	/// Handler for filtering by craft selected in combobox.
+	void cbxFilterCraftByChange(Action *action);			
 	/// Handler for clicking the Inventory button.
 	void btnInventoryClick(Action *action);
 	/// Handler for clicking the Soldiers list.
