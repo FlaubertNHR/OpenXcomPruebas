@@ -44,7 +44,7 @@ private:
 	int _ammo;
 	bool _ammoMissingReported;
 	bool _disabled;
-	Craft *_craftForDrawing;	// craft, used for drawing facility
+	std::vector<Craft*> _craftsForDrawing;	// craft vector, used for drawing facility	
 	bool _hadPreviousFacility;
 public:
 	/// Creates a base facility of the specified type.
@@ -89,10 +89,16 @@ public:
 	bool getDisabled() const;
 	/// Sets the facility's disabled flag.
 	void setDisabled(bool disabled);
-	/// Gets craft, used for drawing facility.
-	Craft *getCraftForDrawing() const;
-	/// Sets craft, used for drawing facility.
-	void setCraftForDrawing(Craft *craft);
+	/// Gets craft vector, used for drawing facility.
+	std::vector<Craft *> getCraftsForDrawing();
+	/// Set craft vector with another craft vector, used for drawing facility.
+	void setCraftsForDrawing(std::vector<Craft*> craftV);
+	/// Add another craft, used for drawing facility.
+	void addCraftForDrawing(Craft *craft);
+	/// Delete craft at vector, used for drawing facility.
+	std::vector<Craft*>::iterator delCraftForDrawing(Craft *craft);	
+	///  Clear vector of crafts at the facility, used for drawing facility.	
+	void clearCraftsForDrawing();
 	/// Gets whether this facility was placed over another or was placed by removing another
 	bool getIfHadPreviousFacility() const;
 	/// Sets whether this facility was placed over another or was placed by removing another

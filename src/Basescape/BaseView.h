@@ -25,6 +25,7 @@ namespace OpenXcom
 class Base;
 class SurfaceSet;
 class BaseFacility;
+class Craft;
 class RuleBaseFacility;
 class Font;
 class Language;
@@ -45,6 +46,7 @@ private:
 	Base *_base;
 	SurfaceSet *_texture;
 	BaseFacility *_facilities[BASE_SIZE][BASE_SIZE], *_selFacility;
+	Craft *_selCraft;
 	Font *_big, *_small;
 	Language *_lang;
 	int _gridX, _gridY;
@@ -100,6 +102,9 @@ public:
 	void setColor(Uint8 color) override;
 	void setSecondaryColor(Uint8 color) override;
 	void setOtherColors(Uint8 red, Uint8 yellow, Uint8 green, bool highContrast);
+
+	/// Gets the currently selected craft
+	Craft *getSelectedCraft() const;
 };
 
 }

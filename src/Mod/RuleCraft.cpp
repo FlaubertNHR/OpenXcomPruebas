@@ -39,7 +39,7 @@ RuleCraft::RuleCraft(const std::string &type, int listOrder) :
 	_maxSmallUnits(-1), _maxLargeUnits(-1), _maxSoldiers(-1), _maxVehicles(-1),
 	_monthlyBuyLimit(0), _costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
 	_transferTime(24), _score(0), _battlescapeTerrainData(0), _maxSkinIndex(0),
-	_keepCraftAfterFailedMission(false), _allowLanding(true), _spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _undetectable(false),
+	_keepCraftAfterFailedMission(false), _allowLanding(true), _spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false), _undetectable(false),  _isSmallCraft(false),
 	_patrolWithoutFuel(false),
 	_missilePower(0),
 	_listOrder(listOrder), _maxAltitude(-1), _defaultAltitude("STR_VERY_LOW"), _onlyOneSoldierGroupAllowed(false), _stats(),
@@ -155,6 +155,7 @@ void RuleCraft::load(const YAML::YamlNodeReader& node, Mod *mod, const ModScript
 	reader.tryRead("notifyWhenRefueled", _notifyWhenRefueled);
 	reader.tryRead("autoPatrol", _autoPatrol);
 	reader.tryRead("undetectable", _undetectable);
+	reader.tryRead("isSmallCraft", _isSmallCraft);	
 	reader.tryRead("patrolWithoutFuel", _patrolWithoutFuel);
 	reader.tryRead("missilePower", _missilePower);
 	reader.tryRead("listOrder", _listOrder);
