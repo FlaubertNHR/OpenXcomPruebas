@@ -111,7 +111,7 @@ private:
 	/// Loads an XCom MAP file.
 	int loadMAP(MapBlock *mapblock, int xoff, int yoff, int zoff, RuleTerrain *terrain, int objectIDOffset, bool discovered = false, bool craft = false, int ufoIndex = -1);
 	/// Loads an XCom RMP file.
-	void loadRMP(MapBlock *mapblock, int xoff, int yoff, int zoff, int segment);
+void loadRMP(MapBlock *mapblock, int xoff, int yoff, int zoff, int segment, bool cullDummyNodes = true);
 	/// Checks a terrain requested by a command and loads it if necessary
 	int loadExtraTerrain(RuleTerrain *terrain);
 	/// Hide the "weapon pile".
@@ -207,6 +207,9 @@ public:
 	// Auto-equip a set of units
 	static void autoEquip(std::vector<BattleUnit*> units, Mod *mod, std::vector<BattleItem*> *craftInv,
 		RuleInventory *groundRuleInv, int worldShade, bool allowAutoLoadout, bool overrideEquipmentLayout);
+	/// Sets up a single map block for editing.
+	void loadMapForEditing();
+	void loadEmptyMap();	
 };
 
 }

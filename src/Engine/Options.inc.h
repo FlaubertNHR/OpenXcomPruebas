@@ -174,6 +174,24 @@ OPT bool oxceInventoryUnloadFixedWeapons;
 
 OPT int oxceMaxEquipmentLayoutTemplates;
 
+OPT int oxceMapEditorBoundsColor;
+
+// Map Editor options, mostly for visual preferences
+OPT bool mapEditorDragSelectPainting;
+OPT bool mapEditorRightClickDragSelect;
+OPT bool mapEditorSelectedTilesKeepFlashing;
+OPT bool mapEditorHoldAltToToggleModeSwitch;
+OPT bool mapEditorUndoRedoBecomesSelection;
+OPT bool mapEditorPastedBecomesSelection;
+OPT bool mapEditorCloseTileSelectionUIAfterClick;
+OPT int mapEditorMaxTileSelectionColumns;
+OPT int mapEditorMaxTileSelectionRows;
+OPT bool mapEditorShowOutOfPlaneNodes;
+OPT bool mapEditorShowOutOfPlaneNodeLinks;
+OPT bool mapEditorDottedOutOfPlaneNodeLinks;
+OPT bool mapEditorShowLinksOnlyForSelectedNodes;
+OPT bool mapEditorShowOutOfPlaneOffsetCursor;
+
 // Flags and other stuff that don't need OptionInfo's.
 OPT bool mute, reload, newOpenGL, newScaleFilter, newHQXFilter, newXBRZFilter, newRootWindowedMode, newFullscreen, newAllowResize, newBorderless;
 OPT int newDisplayWidth, newDisplayHeight, newBattlescapeScale, newGeoscapeScale, newWindowedModePositionX, newWindowedModePositionY;

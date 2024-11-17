@@ -33,6 +33,8 @@ class Mod;
 class ModInfo;
 class FpsCounter;
 class Action;
+class MapEditor;
+class MapEditorSave;
 class GeoscapeState;
 
 /**
@@ -59,6 +61,7 @@ private:
 	bool _ctrl, _alt, _shift, _rmb, _mmb;
 	int _scrollStep;
 	static const double VOLUME_GRADIENT;
+	MapEditor *_mapEditor;	
 
 public:
 	/// Creates a new game and initializes SDL.
@@ -167,6 +170,11 @@ public:
 
 	/// Gets the scroll step value.
 	int getScrollStep() const { return _scrollStep; }
+
+	/// Sets the map editor for the game
+	void setMapEditor(MapEditor *mapEditor);
+	/// Gets the map editor for the game
+	MapEditor *getMapEditor();
 };
 
 }

@@ -27,7 +27,9 @@ enum OptionsOrigin
 {
 	OPT_MENU,
 	OPT_GEOSCAPE,
-	OPT_BATTLESCAPE
+	OPT_BATTLESCAPE,
+	OPT_MAPEDITOR
+	
 };
 
 class Window;
