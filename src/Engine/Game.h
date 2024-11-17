@@ -34,6 +34,8 @@ class ModInfo;
 class FpsCounter;
 class Action;
 class GeoscapeState;
+class MapEditor;
+class MapEditorSave;
 
 /**
  * The core of the game engine, manages the game's entire contents and structure.
@@ -59,6 +61,7 @@ private:
 	bool _ctrl, _alt, _shift, _rmb, _mmb;
 	int _scrollStep;
 	static const double VOLUME_GRADIENT;
+	MapEditor *_mapEditor;	
 
 public:
 	/// Creates a new game and initializes SDL.
@@ -167,6 +170,11 @@ public:
 
 	/// Gets the scroll step value.
 	int getScrollStep() const { return _scrollStep; }
+
+	/// Sets the map editor for the game
+	void setMapEditor(MapEditor *mapEditor);
+	/// Gets the map editor for the game
+	MapEditor *getMapEditor();
 };
 
 }

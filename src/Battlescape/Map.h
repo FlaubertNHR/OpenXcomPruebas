@@ -106,6 +106,7 @@ private:
 
 	void drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Position tileScreenPosition, bool topLayer, BattleUnit* movingUnit = nullptr);
 	void drawTerrain(Surface *surface);
+	void drawForMapEditor(Surface *surface, bool beforeTerrain);	
 	int getTerrainLevel(const Position& pos, int size) const;
 	int getWallShade(TilePart part, Tile* tileFrot);
 	int _iconHeight, _iconWidth, _messageColor;
@@ -115,7 +116,8 @@ private:
 	bool _showInfoOnCursor;
 public:
 	/// Creates a new map at the specified position and size.
-	Map(Game* game, int width, int height, int x, int y, int visibleMapHeight);
+	Map(Game* game, int width, int height, int x, int y, int visibleMapHeight, bool keepObstacleTimerRunning = false);
+
 	/// Cleans up the map.
 	~Map();
 	/// Initializes the map.

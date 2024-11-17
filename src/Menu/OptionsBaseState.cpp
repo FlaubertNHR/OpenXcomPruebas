@@ -31,6 +31,8 @@
 #include "MainMenuState.h"
 #include "../Geoscape/GeoscapeState.h"
 #include "../Battlescape/BattlescapeState.h"
+#include "../Battlescape/MapEditor.h"
+#include "../Battlescape/MapEditorState.h"
 #include "OptionsVideoState.h"
 #include "OptionsAudioState.h"
 #include "OptionsFoldersState.h"
@@ -168,6 +170,12 @@ void OptionsBaseState::restart(OptionsOrigin origin)
 		// Try to reactivate the touch buttons
 		bs->toggleTouchButtons(false, true);
 	}
+	else if (origin == OPT_MAPEDITOR)
+	{
+		MapEditorState *mapEditorState = new MapEditorState(_game->getMapEditor());
+		_game->setState(mapEditorState);
+		_game->getSavedGame()->getSavedBattle()->setMapEditorState(mapEditorState);
+	}
 }
 
 /**
@@ -176,7 +184,8 @@ void OptionsBaseState::restart(OptionsOrigin origin)
 void OptionsBaseState::init()
 {
 	State::init();
-	if (_origin == OPT_BATTLESCAPE)
+	if (_origin == OPT_BATTLESCAPE ||
+		_origin == OPT_MAPEDITOR)
 	{
 		applyBattlescapeTheme("optionsMenu");
 	}
@@ -207,8 +216,8 @@ void OptionsBaseState::btnOkClick(Action *)
 	Options::switchDisplay();
 	int dX = Options::baseXResolution;
 	int dY = Options::baseYResolution;
-	Screen::updateScale(Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, _origin == OPT_BATTLESCAPE);
-	Screen::updateScale(Options::geoscapeScale, Options::baseXGeoscape, Options::baseYGeoscape, _origin != OPT_BATTLESCAPE);
+	Screen::updateScale(Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, _origin == OPT_BATTLESCAPE || _origin == OPT_MAPEDITOR);
+	Screen::updateScale(Options::geoscapeScale, Options::baseXGeoscape, Options::baseYGeoscape, _origin != OPT_BATTLESCAPE && _origin != OPT_MAPEDITOR);	
 	dX = Options::baseXResolution - dX;
 	dY = Options::baseYResolution - dY;
 	recenter(dX, dY);
@@ -249,8 +258,8 @@ void OptionsBaseState::btnCancelClick(Action *)
 	Options::reload = false;
 	Options::load();
 	SDL_WM_GrabInput(Options::captureMouse);
-	Screen::updateScale(Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, _origin == OPT_BATTLESCAPE);
-	Screen::updateScale(Options::geoscapeScale, Options::baseXGeoscape, Options::baseYGeoscape, _origin != OPT_BATTLESCAPE);
+	Screen::updateScale(Options::battlescapeScale, Options::baseXBattlescape, Options::baseYBattlescape, _origin == OPT_BATTLESCAPE || _origin == OPT_MAPEDITOR);
+	Screen::updateScale(Options::geoscapeScale, Options::baseXGeoscape, Options::baseYGeoscape, _origin != OPT_BATTLESCAPE && _origin != OPT_MAPEDITOR);
 	_game->setVolume(Options::soundVolume, Options::musicVolume, Options::uiVolume);
 	_game->popState();
 }

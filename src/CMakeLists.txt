@@ -102,6 +102,8 @@ set ( battlescape_src
   Battlescape/InventoryState.cpp
   Battlescape/ItemSprite.cpp
   Battlescape/Map.cpp
+  Battlescape/MapEditor.cpp  
+  Battlescape/MapEditorState.cpp  
   Battlescape/MedikitState.cpp
   Battlescape/MedikitView.cpp
   Battlescape/MeleeAttackBState.cpp
@@ -257,12 +259,19 @@ set ( menu_src
   Menu/CutsceneState.cpp
   Menu/DeleteGameState.cpp
   Menu/ErrorMessageState.cpp
+  Menu/FileBrowserState.cpp  
   Menu/ListGamesState.cpp
   Menu/ListLoadOriginalState.cpp
   Menu/ListLoadState.cpp
   Menu/ListSaveState.cpp
   Menu/LoadGameState.cpp
   Menu/MainMenuState.cpp
+  Menu/MapEditorMenuState.cpp
+  Menu/MapEditorFindNodeState.cpp
+  Menu/MapEditorFindTileState.cpp
+  Menu/MapEditorInfoState.cpp
+  Menu/MapEditorOptionsState.cpp
+  Menu/MapEditorSetSizeState.cpp
   Menu/NewBattleState.cpp
   Menu/NewGameState.cpp
   Menu/NotesState.cpp
@@ -367,6 +376,7 @@ set ( savegame_src
   Savegame/GeoscapeEvent.cpp
   Savegame/HitLog.cpp
   Savegame/ItemContainer.cpp
+  Savegame/MapEditorSave.cpp  
   Savegame/MissionSite.cpp
   Savegame/MovingTarget.cpp
   Savegame/Node.cpp

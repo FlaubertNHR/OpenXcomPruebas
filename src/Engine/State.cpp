@@ -1,4 +1,4 @@
-/*
+	/*
  * Copyright 2010-2016 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
@@ -51,7 +51,7 @@ Game* State::_game = 0;
  * By default states are full-screen.
  * @param game Pointer to the core game.
  */
-State::State() : _screen(true), _soundPlayed(false), _modal(0), _ruleInterface(0), _ruleInterfaceParent(0), _customSound(nullptr)
+State::State() : _screen(true), _soundPlayed(false), _modal(0), _ruleInterface(0), _ruleInterfaceParent(0), _customSound(nullptr), _fileName("")
 {
 	// initialize palette to all black
 	memset(_palette, 0, sizeof(_palette));
@@ -689,6 +689,24 @@ int State::getCursorY() const
 void State::setGamePtr(Game* game)
 {
 	_game = game;
+}
+
+/**
+ * Sets a file name for access by a parent state of the file browser
+ * @param fileName the directory + name of the file
+ */
+void State::setFileName(std::string fileName)
+{
+	_fileName = fileName;
+}
+
+/**
+ * Gets the file name set by the browser
+ * @return the directory + name of the file
+ */
+std::string State::getFileName()
+{
+	return _fileName;
 }
 
 }

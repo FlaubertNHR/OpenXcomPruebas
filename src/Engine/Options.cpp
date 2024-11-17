@@ -199,6 +199,26 @@ void createOptionsOXC()
 	_info.push_back(OptionInfo(OPTION_OXC, "rootWindowedMode", &rootWindowedMode, false));
 	_info.push_back(OptionInfo(OPTION_OXC, "backgroundMute", &backgroundMute, false));
 	_info.push_back(OptionInfo(OPTION_OXC, "soldierDiaries", &soldierDiaries, true));
+
+	// Map Editor
+	_info.push_back(OptionInfo(OPTION_OXCE, "oxceMapEditorBoundsColor", &oxceMapEditorBoundsColor, 13, "", "HIDDEN"));
+
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorDragSelectPainting", &mapEditorDragSelectPainting, false, "STR_DRAG_SELECT_PAINTING", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorRightClickDragSelect", &mapEditorRightClickDragSelect, false, "STR_RIGHT_CLICK_DRAG_SELECT", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorSelectedTilesKeepFlashing", &mapEditorSelectedTilesKeepFlashing, true, "STR_SELECTED_TILES_KEEP_FLASHING", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorHoldAltToToggleModeSwitch", &mapEditorHoldAltToToggleModeSwitch, false, "STR_HOLD_ALT_TO_TOGGLE_MODE_SWITCH", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorUndoRedoBecomesSelection", &mapEditorUndoRedoBecomesSelection, false, "STR_UNDO_REDO_BECOMES_SELECTION", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorPastedBecomesSelection", &mapEditorPastedBecomesSelection, false, "STR_PASTED_BECOMES_SELECTION", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorCloseTileSelectionUIAfterClick", &mapEditorCloseTileSelectionUIAfterClick, false, "STR_CLOSE_TILE_SELECTION_UI_AFTER_CLICK", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorMaxTileSelectionColumns", &mapEditorMaxTileSelectionColumns, 16, "STR_MAX_NUMBER_OF_TILE_SELECTION_COLUMNS", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorMaxTileSelectionRows", &mapEditorMaxTileSelectionRows, 12, "STR_MAX_NUMBER_OF_TILE_SELECTION_ROWS", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorShowOutOfPlaneNodes", &mapEditorShowOutOfPlaneNodes, true, "STR_SHOW_OUT_OF_PLANE_NODES", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorShowOutOfPlaneNodeLinks", &mapEditorShowOutOfPlaneNodeLinks, true, "STR_SHOW_OUT_OF_PLANE_NODE_LINKS", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorDottedOutOfPlaneNodeLinks", &mapEditorDottedOutOfPlaneNodeLinks, true, "STR_DOTTED_OUT_OF_PLANE_NODE_LINKS", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorShowLinksOnlyForSelectedNodes", &mapEditorShowLinksOnlyForSelectedNodes, false, "STR_SHOW_LINKS_ONLY_FOR_SELECTED_NODES", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo(OPTION_OXCE, "mapEditorShowOutOfPlaneOffsetCursor", &mapEditorShowOutOfPlaneOffsetCursor, false, "STR_SHOW_OUT_OF_PLANE_OFFSET_CURSOR", "STR_MAPEDITOR"));
+
+
 }
 
 void createAdvancedOptionsOXC()

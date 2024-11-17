@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <sstream>
 #include "BattlescapeGenerator.h"
+#include "MapEditor.h"
 #include "TileEngine.h"
 #include "Inventory.h"
 #include "AIModule.h"
@@ -2083,10 +2084,24 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
 	char size[3];
 	unsigned char value[4];
 	std::string filename = "MAPS/" + mapblock->getName() + ".MAP";
+	std::unique_ptr<std::istream> mapFile = 0;
 	unsigned int terrainObjectID;
 
+	// A little filename editing for loading a MAP direct from file instead of from mod
+	MapEditor *editor = _game->getMapEditor();
+	if (editor)
+	{
+		std::string baseDirectory = editor->getMapFileToLoadDirectory();
+		if (!baseDirectory.empty())
+		{
+			filename = editor->getFullPathToMAPToLoad();
+			mapFile = CrossPlatform::readFile(filename);
+		}
+	}
+
 	// Load file
-	auto mapFile = FileMap::getIStream(filename);
+	if (!mapFile)
+		mapFile = FileMap::getIStream(filename);
 
 	mapFile->read((char*)&size, sizeof(size));
 	sizey = (int)size[0];
@@ -2350,12 +2365,27 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, int zo
  * @param segment Mapblock segment.
  * @sa http://www.ufopaedia.org/index.php?title=ROUTES
  */
-void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int zoff, int segment)
+void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int zoff, int segment, bool cullDummyNodes)
 {
 	unsigned char value[24];
 	std::string filename = "ROUTES/" + mapblock->getName() +".RMP";
+	std::unique_ptr<std::istream> mapFile = 0;
+
+	// A little filename editing for loading a MAP direct from file instead of from mod
+	MapEditor *editor = _game->getMapEditor();
+	if (editor)
+	{
+		std::string baseDirectory = editor->getMapFileToLoadDirectory();
+		if (!baseDirectory.empty())
+		{
+			filename = editor->getFullPathToRMPToLoad();
+			mapFile = CrossPlatform::readFile(filename);
+		}
+	}
+
 	// Load file
-	auto mapFile = FileMap::getIStream(filename);
+	if (!mapFile)
+		mapFile = FileMap::getIStream(filename);
 
 	size_t nodeOffset = _save->getNodes()->size();
 	std::vector<int> badNodes;
@@ -2366,9 +2396,10 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int z
 		int pos_y = value[0];
 		int pos_z = value[2];
 		Node *node;
-		if (pos_x >= 0 && pos_x < mapblock->getSizeX() &&
+		if ((pos_x >= 0 && pos_x < mapblock->getSizeX() &&
 			pos_y >= 0 && pos_y < mapblock->getSizeY() &&
-			pos_z >= 0 && pos_z < mapblock->getSizeZ())
+			pos_z >= 0 && pos_z < mapblock->getSizeZ()) ||
+			!cullDummyNodes)
 		{
 			Position pos = Position(xoff + pos_x, yoff + pos_y, mapblock->getSizeZ() - 1 - pos_z + zoff);
 			int type     = value[19];
@@ -2391,6 +2422,9 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int z
 					connectID -= 256;
 				}
 				node->getNodeLinks()->push_back(connectID);
+				// load legacy data that isn't used anywhere, but makes me feel better that I don't leave it out
+				int linkType = value[6 + j * 3];
+				node->getLinkTypes()->push_back(linkType);				
 			}
 		}
 		else
@@ -2400,6 +2434,9 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int z
 			// this is because the "built in" nodeLinks reference each other by number, and it's gonna be implementational hell to try
 			// to adjust those numbers retroactively, post-culling. far better to simply mark these culled nodes as dummies, and discount their use
 			// that way, all the connections will still line up properly in the array.
+			//
+			// Note that specifically for the case of the map editor, we're leaving in these out-of-bounds nodes so that they can be fixed
+			//			
 			node = new Node();
 			node->setDummy(true);
 			Log(LOG_INFO) << "Bad node in RMP file: " << filename << " Node #" << nodesAdded << " is outside map boundaries at X:" << pos_x << " Y:" << pos_y << " Z:" << pos_z << ". Culling Node.";
@@ -4816,6 +4853,103 @@ void BattlescapeGenerator::setMusic(const AlienDeployment* ruleDeploy, bool next
 	{
 		_save->setMusic("");
 	}
+}
+
+/**
+ * Creates a mini-battle-save for editing map files.
+ */
+void BattlescapeGenerator::loadMapForEditing()
+{
+	// Since this mapblock might not have been loaded before, the size might be wrong
+	// We check the size defined in the file instead since we need to set the 'battlescape' size
+	std::string filename;
+	std::unique_ptr<std::istream> mapFile = 0;
+	MapBlock *block = 0;
+	bool loadFromFullPath = !_game->getMapEditor()->getMapFileToLoadDirectory().empty();
+
+	if (loadFromFullPath)
+	{
+		filename = _game->getMapEditor()->getFullPathToMAPToLoad();
+		mapFile = CrossPlatform::readFile(filename);
+	}
+	else
+	{
+		filename = "MAPS/" + _game->getMapEditor()->getMapFileToLoadName() + ".MAP";
+		block = _terrain->getMapBlock(_game->getMapEditor()->getMapFileToLoadName());
+	}
+
+	int sizex, sizey, sizez;
+	char size[3];
+
+	// Load file
+	if (!mapFile)
+		mapFile = FileMap::getIStream(filename);
+
+	mapFile->read((char*)&size, sizeof(size));
+	sizey = (int)size[0];
+	sizex = (int)size[1];
+	sizez = (int)size[2];
+
+	_mapsize_x = sizex;
+	_mapsize_y = sizey;
+	_mapsize_z = sizez;
+	init(true);
+
+	for (const auto& i : *_terrain->getMapDataSets())
+	{
+		i->loadData(_game->getMod()->getMCDPatch(i->getName()));
+		_save->getMapDataSets()->push_back(i);
+	}
+
+	if (loadFromFullPath)
+	{
+		block = new MapBlock(_game->getMapEditor()->getMapFileToLoadName(), sizex, sizey, sizez);
+	}
+
+	loadMAP(block, 0, 0, 0, _terrain, 0, true);
+	loadRMP(block, 0, 0, 0, 0, false);
+
+	if (loadFromFullPath)
+	{
+		delete block;
+	}
+
+	_save->setGlobalShade(_worldShade);
+	_save->getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
+}
+
+void BattlescapeGenerator::loadEmptyMap()
+{
+	// The size of the map was set before starting the generator for new maps
+	_mapsize_x = _save->getMapSizeX();
+	_mapsize_y = _save->getMapSizeY();
+	_mapsize_z = _save->getMapSizeZ();
+	init(true);
+
+	for (const auto& i : *_terrain->getMapDataSets())
+	{
+		i->loadData(_game->getMod()->getMCDPatch(i->getName()));
+		_save->getMapDataSets()->push_back(i);
+	}
+
+	for (int z = 0; z < _mapsize_z; ++z)
+	{
+		for (int y = 0; y < _mapsize_y; ++y)
+		{
+			for (int x = 0; x < _mapsize_x; ++x)
+			{
+				for (int t = 0; t < O_MAX; ++t)
+				{
+					TilePart part = (TilePart)t;
+					_save->getTile(Position(x, y, z))->setMapData(0, -1, -1, part);
+				}
+				_save->getTile(Position(x, y, z))->setDiscovered(true, O_FLOOR);
+			}
+		}
+	}
+
+	_save->setGlobalShade(_worldShade);
+	_save->getTileEngine()->calculateLighting(LL_AMBIENT, TileEngine::invalid, 0, true);
 }
 
 }
