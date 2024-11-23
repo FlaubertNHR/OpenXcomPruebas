@@ -333,13 +333,14 @@ void TestState::testCase4()
 	// 2. check for existence of mapblock MAP and RMP files
 	Log(LOG_INFO) << "----------------------------------------------2. check for existence of mapblock MAP and RMP files";
 
-	auto checkExistence = [](std::map<std::string, int> &mapRef, const std::string &dir, const std::string &ext, int &totalRef)
+	auto checkExistence = [](std::map<std::string, int> &mapRef, const std::string &dir, const std::string &ext, int &totalRef, const std::string &ext2="")
 	{
 		for (auto& mapItem : mapRef)
 		{
-			std::ostringstream filename;
+			std::ostringstream filename, filename2;
 			filename << dir << mapItem.first << ext;
-			if (!FileMap::fileExists(filename.str()))
+			filename2 << dir << mapItem.first << ext2;			
+			if (!(FileMap::fileExists(filename.str()) || FileMap::fileExists(filename2.str())))
 			{
 				++totalRef;
 				Log(LOG_INFO) << filename.str() << " not found";
@@ -347,7 +348,7 @@ void TestState::testCase4()
 		}
 	};
 
-	checkExistence(blockMap, "MAPS/", ".MAP", total);
+	checkExistence(blockMap, "MAPS/", ".MAP", total, ".MAP2");
 	checkExistence(blockMap, "ROUTES/", ".RMP", total);
 
 	// 3. check for existence of mapdataset MCD, PCK and TAB files
@@ -921,21 +922,37 @@ int TestState::loadMAP(MapBlock *mapblock)
 {
 	int sizez;
 	char size[3];
+   	uint16_t size2[3];
+    	bool fileIsMAP = true;
 	std::ostringstream filename;
 	filename << "MAPS/" << mapblock->getName() << ".MAP";
-
+	if(!FileMap::fileExists(filename.str()))
+	{
+		filename.str("");
+		filename.clear();
+		filename << "MAPS/" << mapblock->getName() << ".MAP2";
+		fileIsMAP = false;			
+	}
 	// Load file
 	auto mapFile = FileMap::getIStream(filename.str());
 	if (!mapFile)
 	{
 		throw Exception(filename.str() + " not found");
 	}
-
+	if (fileIsMAP)
+	{
 	mapFile->read((char*)&size, sizeof(size));
 	//sizey = (int)size[0];
 	//sizex = (int)size[1];
 	sizez = (int)size[2];
-
+	}
+	else
+	{
+		mapFile->read((char*)&size2, sizeof(size2));
+		//sizey = (int)size[0];
+		//sizex = (int)size[1];
+		sizez = (int)size2[2];		
+	}
 	//mapblock->setSizeZ(sizez); // commented out, for testing purposes we don't need to HACK it like in real code
 
 	return sizez;
