@@ -811,4 +811,13 @@ MapEditor *Game::getMapEditor()
 	return _mapEditor;
 }
 
+/**
+ * Deletes the Map Editor
+ */
+void Game::deleteMapEditor()
+{
+	delete _mapEditor;
+	_mapEditor = NULL;
+}
+
 }

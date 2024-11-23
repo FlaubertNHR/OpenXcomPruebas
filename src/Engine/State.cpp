@@ -50,6 +50,7 @@ Game* State::_game = 0;
  * @param game Pointer to the core game.
  */
 State::State() : _screen(true), _soundPlayed(false), _modal(0), _ruleInterface(0), _ruleInterfaceParent(0), _customSound(nullptr), _fileName("")
+,_fileExtension(".MAP")
 {
 	// initialize palette to all black
 	memset(_palette, 0, sizeof(_palette));
@@ -689,6 +690,24 @@ void State::setFileName(std::string fileName)
 std::string State::getFileName()
 {
 	return _fileName;
+}
+
+/**
+ * Sets a file type for access by a parent state of the file browser
+ * @param fileType the type/extension of the file
+ */
+void State::setFileType(std::string fileExtension)
+{
+	_fileExtension = fileExtension;
+}
+
+/**
+ * Gets the file type set by the browser
+ * @return the type/extension of the file
+ */
+std::string State::getFileType()
+{
+	return _fileExtension;
 }
 
 }

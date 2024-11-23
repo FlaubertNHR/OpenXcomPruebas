@@ -40,7 +40,7 @@ private :
 	Text *_txtTitle, *_txtSearch, *_txtSelectedMap, *_txtSelectedMapTerrain, *_txtPickTerrainMode;
     TextButton *_filterTerrain, *_filterCraft, *_filterUFOs, *_mapFilter;
     TextButton *_btnBrowser;
-	TextButton *_btnOk, *_btnCancel, *_btnNew;
+	TextButton *_btnOk, *_btnCancel, *_btnNew, *_btnConvert;
     TextEdit *_edtQuickSearch;
     TextList *_lstMaps;
     Frame *_frameLeft, *_frameRight;
@@ -83,6 +83,8 @@ public :
     void btnCancelClick(Action *action);
     /// Handles toggling the new map mode
     void btnNewMapClick(Action *action);
+    /// Handles clicking the Convert button
+    void btnConvertClick(Action *action);    
     /// Sets the information necessary for a new map
     void setNewMapInformation(std::string newMapName, int newMapX, int newMapY, int newMapZ);
 

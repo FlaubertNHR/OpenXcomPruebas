@@ -58,6 +58,7 @@ protected:
 	RuleInterface *_ruleInterfaceParent;
 	const Sound* _customSound;
 	std::string _fileName;	
+	std::string _fileExtension;		
 
 	SDL_Color _palette[256];
 	Uint8 _cursorColor;
@@ -144,6 +145,11 @@ public:
 	void setFileName(std::string fileName);
 	/// Gets the file name set by the browser
 	std::string getFileName();	
+
+	/// Sets a file type for access by a parent state of the file browser
+	void setFileType(std::string fileName);
+	/// Gets the file type set by the browser
+	std::string getFileType();			
 };
 
 }

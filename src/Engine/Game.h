@@ -165,6 +165,8 @@ public:
 	void setMapEditor(MapEditor *mapEditor);
 	/// Gets the map editor for the game
 	MapEditor *getMapEditor();
+	/// Deletes Map Editor Object
+	void deleteMapEditor();
 };
 
 }

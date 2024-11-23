@@ -830,7 +830,7 @@ size_t MapEditor::searchForMapFileInfo(std::string filePath)
     MapFileInfo fileInfo;
     fileInfo.baseDirectory = getBaseDirectory(filePath);
     fileInfo.name = CrossPlatform::noExt(CrossPlatform::baseFilename(filePath));
-    
+    fileInfo.extension = CrossPlatform::getExt(CrossPlatform::baseFilename(filePath));
     return _mapSave->findMatchingFiles(&fileInfo);
 }
 
@@ -848,6 +848,22 @@ std::string MapEditor::getMapFileToLoadName()
 void MapEditor::setMapFileToLoadName(std::string name)
 {
     _mapSave->getMapFileToLoad()->name = name;
+}
+
+/**
+ * Gets the type of the map file to load
+ */
+std::string MapEditor::getMapFileToLoadType()
+{
+    return _mapSave->getMapFileToLoad()->extension;
+}
+
+/**
+ * Sets the type of the map file to load
+ */
+void MapEditor::setMapFileToLoadType(std::string extension)
+{
+    _mapSave->getMapFileToLoad()->extension = extension;
 }
 
 /**
@@ -903,9 +919,10 @@ std::string MapEditor::getFullPathToRMPToLoad()
  * @param mapName changes the map name
  * @param baseDirectory where the file is located (parent directory for MAPS/ROUTES)
  */
-void MapEditor::updateMapFileInfo(std::string mapName, std::string baseDirectory, std::string terrainName)
+void MapEditor::updateMapFileInfo(std::string mapName, std::string baseDirectory, std::string extension, std::string terrainName)
 {
     _mapSave->getCurrentMapFile()->name = mapName;
+    _mapSave->getCurrentMapFile()->extension = extension;  
     _mapSave->getCurrentMapFile()->baseDirectory = baseDirectory;
     _mapSave->getCurrentMapFile()->terrain = terrainName;
     _mapSave->getCurrentMapFile()->mods.clear();
@@ -925,7 +942,7 @@ void MapEditor::updateMapFileInfo(std::string mapName, std::string baseDirectory
  * @param fullPath directory to the file
  * @param terrainName name of the terrain (defaults to "")
  */
-void MapEditor::updateMapFileInfo(std::string fullPath, std::string terrainName)
+void MapEditor::updateMapFileInfo(std::string fullPath, std::string fileExtension, std::string terrainName)
 {
     // Get just the file name
     std::string fileName = getFileName(fullPath);
@@ -937,8 +954,7 @@ void MapEditor::updateMapFileInfo(std::string fullPath, std::string terrainName)
     {
         terrainName = _mapSave->getCurrentMapFile()->terrain;
     }
-
-    updateMapFileInfo(fileName, filePath, terrainName);
+    updateMapFileInfo(fileName, filePath, fileExtension, terrainName);
 }
 
 /**
@@ -946,7 +962,7 @@ void MapEditor::updateMapFileInfo(std::string fullPath, std::string terrainName)
  */
 void MapEditor::updateMapFileInfo()
 {
-    updateMapFileInfo(getMapFileToLoadName(), getMapFileToLoadDirectory(), getMapFileToLoadTerrain());
+    updateMapFileInfo(getMapFileToLoadName(),getMapFileToLoadDirectory(), getMapFileToLoadType(), getMapFileToLoadTerrain());
 }
 
 /**
@@ -967,8 +983,15 @@ void MapEditor::saveMapFile()
 {
     std::string message = "STR_MAP_EDITOR_SAVED_SUCCESSFULLY";
     std::string filename = _mapSave->getCurrentMapFile()->name;
+    std::string fileType =  _mapSave->getCurrentMapFile()->extension;
     std::string filepath = _mapSave->getCurrentMapFile()->baseDirectory;
     std::string logInfo = "\n    mapDataSets:\n";
+    bool fileisMAP;
+    bool saveOk = true;
+    if(fileType.compare(".MAP") == 0)
+        fileisMAP=true;
+    else
+        fileisMAP=false;        
     for (auto i : *_save->getMapDataSets())
     {
         logInfo += "      - " + i->getName() + "\n";
@@ -986,16 +1009,26 @@ void MapEditor::saveMapFile()
         fullpath = fullpath + MapEditorSave::MAP_DIRECTORY;
     }
     fullpath = CrossPlatform::convertPath(fullpath);
-    fullpath = fullpath + filename + ".MAP"; //TODO add extensions to MapEditorSave's consts?
+    fullpath = fullpath + filename + fileType;
     Log(LOG_INFO) << "Saving edited map file " + fullpath;
 
     std::vector<unsigned char> data;
-    data.clear();
+    std::vector<uint16_t> data2;    
+    if(fileisMAP){
+        data.clear();
 
-    data.push_back((unsigned char)_save->getMapSizeY()); // x and y are in opposite order in MAP files
-    data.push_back((unsigned char)_save->getMapSizeX());
-    data.push_back((unsigned char)_save->getMapSizeZ());
+        data.push_back((unsigned char)_save->getMapSizeY()); // x and y are in opposite order in MAP files
+        data.push_back((unsigned char)_save->getMapSizeX());
+        data.push_back((unsigned char)_save->getMapSizeZ());
+    }
+    else
+    {
+        data2.clear();
 
+        data2.push_back((uint16_t)_save->getMapSizeY()); // x and y are in opposite order in MAP files
+        data2.push_back((uint16_t)_save->getMapSizeX());
+        data2.push_back((uint16_t)_save->getMapSizeZ());        
+    }
     for (int z = _save->getMapSizeZ() - 1; z > -1; --z)
     {
         for (int y = 0; y < _save->getMapSizeY(); ++y)
@@ -1022,103 +1055,127 @@ void MapEditor::saveMapFile()
                     {
                         mapDataID = 0;
                     }
-
-                    data.push_back((unsigned char)mapDataID);
+                    if(fileisMAP)
+                    {
+                        if(mapDataID <256)
+                        {
+                            data.push_back((unsigned char)mapDataID);
+                        }
+			else
+                        {
+                            message = "STR_MAP_EDITOR_SAVED_FAILED";
+                            saveOk = false;
+                        }
+                    }
+                    else
+		    {
+                        data2.push_back((uint16_t)mapDataID);
+		    }
                 }
             }
         }
     }
-
-	if (!CrossPlatform::writeFile(fullpath, data))
-	{
-		throw Exception("Failed to save " + fullpath);
-	}
-
-    fullpath = filepath;
-    if(CrossPlatform::folderExists(fullpath + MapEditorSave::RMP_DIRECTORY))
+    if(saveOk)
     {
-        fullpath = fullpath + MapEditorSave::RMP_DIRECTORY;
-    }
-    fullpath = CrossPlatform::convertPath(fullpath);
-    fullpath = fullpath + filename + ".RMP"; //TODO add extensions to MapEditorSave's consts?
-    Log(LOG_INFO) << "Saving edited route file " + fullpath;
-
-    // Start by finding how many 24-byte nodes we need to allocate and which nodes are "active" and should be saved
-    std::vector<Node*> nodesToSave;
-    // Node IDs aren't saved into RMP files, so the index has to match position of the node in the file
-    // We'll also create a map of current node IDs to where they should be in the RMP file and the proper connections for them
-    std::map<int, int> nodeIDMap;
-    int offset = 0;
-    for (auto node : *_save->getNodes())
-    {
-
-        int currentID = node->getID();
-        if (isNodeOverIDLimit(node))
+        if(fileisMAP)
         {
-            nodeIDMap[currentID] = -1;
-            message = "STR_MAP_EDITOR_SAVED_NODES_OVER_LIMIT";
-        }
-        else if (isNodeActive(node))
-        {
-            nodesToSave.push_back(node);
-            nodeIDMap[currentID] = currentID - offset;
+            if (!CrossPlatform::writeFile(fullpath, data))
+            {
+                throw Exception("Failed to save " + fullpath);
+            }
         }
         else
         {
-            nodeIDMap[currentID] = -1;
-            ++offset;
+            if (!CrossPlatform::writeFile(fullpath, data2))
+            {
+                throw Exception("Failed to save " + fullpath);
+            }        
         }
-    }
-
-    // Assign vector to hold the node data, 24 bytes per node (up to the max ID number we just found)
-    data.clear();
-    data.resize(24 * nodesToSave.size());
-
-    for (auto node : nodesToSave)
-    {
-        size_t nodeIDBytePosition = 24 * nodeIDMap[node->getID()];
-        data.at(nodeIDBytePosition + 0) = (unsigned char)node->getPosition().y;
-        data.at(nodeIDBytePosition + 1) = (unsigned char)node->getPosition().x;
-        data.at(nodeIDBytePosition + 2) = (unsigned char)(_save->getMapSizeZ() - 1 - node->getPosition().z);
-
-        for (int i = 0; i < 5; ++i)
+        fullpath = filepath;
+        if(CrossPlatform::folderExists(fullpath + MapEditorSave::RMP_DIRECTORY))
         {
-            int link = node->getNodeLinks()->at(i);
-            // remap the links to nodes so we match the positions of the nodes in the RMP file
-            if (link >= 0)
-            {
-                link = nodeIDMap[link];
-            }
-            // negative values are for special links
-            // 255/-1 = unused, 254/-2 = north, 253/-3 = east, 252/-4 = south, 251/-5 = west
-            if (link < 0)
-            {
-                link = 256 + link;
-            }
-            int type = node->getLinkTypes()->at(i);
+            fullpath = fullpath + MapEditorSave::RMP_DIRECTORY;
+        }
+        fullpath = CrossPlatform::convertPath(fullpath);
+        fullpath = fullpath + filename + ".RMP"; //TODO add extensions to MapEditorSave's consts?
+        Log(LOG_INFO) << "Saving edited route file " + fullpath;
 
-            data.at(nodeIDBytePosition + 4 + i * 3) = (unsigned char)link;
-            data.at(nodeIDBytePosition + 5 + i * 3) = 0;
-            data.at(nodeIDBytePosition + 6 + i * 3) = (unsigned char)type;
+        // Start by finding how many 24-byte nodes we need to allocate and which nodes are "active" and should be saved
+        std::vector<Node*> nodesToSave;
+        // Node IDs aren't saved into RMP files, so the index has to match position of the node in the file
+        // We'll also create a map of current node IDs to where they should be in the RMP file and the proper connections for them
+        std::map<int, int> nodeIDMap;
+        int offset = 0;
+        for (auto node : *_save->getNodes())
+        {
+
+            int currentID = node->getID();
+            if (isNodeOverIDLimit(node))
+            {
+                nodeIDMap[currentID] = -1;
+                message = "STR_MAP_EDITOR_SAVED_NODES_OVER_LIMIT";
+            }
+            else if (isNodeActive(node))
+            {
+                nodesToSave.push_back(node);
+                nodeIDMap[currentID] = currentID - offset;
+            }
+            else
+            {
+                nodeIDMap[currentID] = -1;
+                ++offset;
+            }
         }
 
-        data.at(nodeIDBytePosition + 19) = (unsigned char)node->getType();
-        data.at(nodeIDBytePosition + 20) = (unsigned char)node->getRank();
-        data.at(nodeIDBytePosition + 21) = (unsigned char)node->getFlags();
-        data.at(nodeIDBytePosition + 22) = node->isTarget() ? 5 : 0;
-        data.at(nodeIDBytePosition + 23) = (unsigned char)node->getPriority();
+        // Assign vector to hold the node data, 24 bytes per node (up to the max ID number we just found)
+        data.clear();
+        data.resize(24 * nodesToSave.size());
+
+        for (auto node : nodesToSave)
+        {
+            size_t nodeIDBytePosition = 24 * nodeIDMap[node->getID()];
+            data.at(nodeIDBytePosition + 0) = (unsigned char)node->getPosition().y;
+            data.at(nodeIDBytePosition + 1) = (unsigned char)node->getPosition().x;
+            data.at(nodeIDBytePosition + 2) = (unsigned char)(_save->getMapSizeZ() - 1 - node->getPosition().z);
+
+            for (int i = 0; i < 5; ++i)
+            {
+                int link = node->getNodeLinks()->at(i);
+                // remap the links to nodes so we match the positions of the nodes in the RMP file
+                if (link >= 0)
+                {
+                    link = nodeIDMap[link];
+                }
+                // negative values are for special links
+                // 255/-1 = unused, 254/-2 = north, 253/-3 = east, 252/-4 = south, 251/-5 = west
+                if (link < 0)
+                {
+                    link = 256 + link;
+                }
+                int type = node->getLinkTypes()->at(i);
+
+                data.at(nodeIDBytePosition + 4 + i * 3) = (unsigned char)link;
+                data.at(nodeIDBytePosition + 5 + i * 3) = 0;
+                data.at(nodeIDBytePosition + 6 + i * 3) = (unsigned char)type;
+            }
+
+            data.at(nodeIDBytePosition + 19) = (unsigned char)node->getType();
+            data.at(nodeIDBytePosition + 20) = (unsigned char)node->getRank();
+            data.at(nodeIDBytePosition + 21) = (unsigned char)node->getFlags();
+            data.at(nodeIDBytePosition + 22) = node->isTarget() ? 5 : 0;
+            data.at(nodeIDBytePosition + 23) = (unsigned char)node->getPriority();
+        }
+
+        // It is still valid to write an empty RMP file - that just means we have no nodes
+        // But if there are nodes and we fail to save, then something is wrong
+        if (!CrossPlatform::writeFile(fullpath, data) && nodesToSave.size() > 0)
+        {
+            throw Exception("Failed to save " + fullpath);
+        }
+
+        _mapSave->addMap(*_mapSave->getCurrentMapFile());
+        _mapSave->save();
     }
-
-    // It is still valid to write an empty RMP file - that just means we have no nodes
-    // But if there are nodes and we fail to save, then something is wrong
-	if (!CrossPlatform::writeFile(fullpath, data) && nodesToSave.size() > 0)
-	{
-		throw Exception("Failed to save " + fullpath);
-	}
-
-    _mapSave->addMap(*_mapSave->getCurrentMapFile());
-    _mapSave->save();
-
     _messages.push_back(message);
 }
 
@@ -1193,7 +1250,8 @@ std::string MapEditor::getMAPorRMPDirectory(std::string baseDirectory, std::stri
 {
     std::string fullPath = "";
     std::string folder = rmpMode ? MapEditorSave::RMP_DIRECTORY : MapEditorSave::MAP_DIRECTORY;
-    std::string extension = rmpMode ? ".RMP" : ".MAP";
+    std::string extension2 = this->getMapFileToLoadType();
+    std::string extension = rmpMode ? ".RMP" : extension2;
 
     if (CrossPlatform::fileExists(CrossPlatform::convertPath(baseDirectory) + mapName + extension))
     {

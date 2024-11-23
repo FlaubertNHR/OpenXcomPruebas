@@ -239,6 +239,7 @@ namespace CrossPlatform
 	/// Writes out a file
 	bool writeFile(const std::string& filename, const std::string& data);
 	bool writeFile(const std::string& filename, const std::vector<unsigned char>& data);
+	bool writeFile(const std::string& filename, const std::vector<uint16_t>& data);	
 	/// Reads in a file
 	std::unique_ptr<std::istream> readFile(const std::string& filename);
 	/// Reads file until "\n---" sequence is met or to the end. To be used only for savegames.

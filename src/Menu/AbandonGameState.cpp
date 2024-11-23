@@ -120,6 +120,8 @@ void AbandonGameState::btnYesClick(Action *)
 	{
 		_game->pushState(new SaveGameState(OPT_GEOSCAPE, SAVE_IRONMAN_END, _palette));
 	}
+	if(_game->getMapEditor())
+		_game->deleteMapEditor();
 }
 
 /**

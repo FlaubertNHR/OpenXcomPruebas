@@ -209,6 +209,7 @@ size_t MapEditorSave::findMatchingFiles(MapFileInfo *fileInfo)
     if (numFound == 1)
     {
         _mapFileToLoad = _matchedFiles.front();
+        _mapFileToLoad.extension = fileInfo->extension;
     }
 
     return numFound;
