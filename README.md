@@ -12,6 +12,52 @@ and the [wiki](https://www.ufopaedia.org/index.php/OpenXcom).
 
 Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
+## Battlescape Editor
+
+Battlescape Editor by ohartenstein23
+ (https://github.com/ohartenstein23/OpenXcom/tree/battlescape-editor) is a fork from original OXCE+ which allows editing MAP files
+ Main features are:
+ - Editing of maps included in the currently loaded set of mods
+ - Creating new maps from the terrains defined in the currently loaded set of mods
+ - Editing single tiles at a time by adding, changing, or removing objects within the tile
+ - Editing single AI nodes at a time by adding, moving, changing, and removing them and their links
+ - Switching between tile and AI node editing modes
+ - Undoing and redoing single tile/node edits
+ - Saving edited .MAP and .RMP files in the current OXCE user folder
+ - Sample ruleset for implementation of the edited .MAP and .RMP files in the openxcom.log file
+ - Opening the main Map Editor Menu for creating/selecting a new map to edit directly from the Editor Interface.
+ - Editing multiple tiles/nodes at a time by both rectangular selection and paintbrush-style selection tools
+ - Copying, cutting, and pasting selections of multiple tiles/nodes at once
+ - Find and replace tools for searching and editing tile and node content
+ - Searching of text lists in the Map Editor Menu
+ - Find and replace tools for searching and editing tile and node content
+
+Documentatation can be found [here](https://openxcom.org/forum/index.php?action=dlattach;topic=8711.0;attach=53017).
+
+## Battlescape Editor MAP/MAP2 fork
+
+This version is a fork of original Battlescape Editor with a new MAP2 format support.
+
+It allows using old MAP and also new MAP2 versions of terrain blocks. MAP2 info is stored in uint16_t instead of char, so there is no virtual limit for tiles used in a map.
+
+- In case of having MAP & MAP2 maps with the same name, it will load first MAP files (will try MAP at mod/MAPS directory, then /standard/xcom1/MAPS, then UFO/MAPS; if not found will try again with MAP2 extension)
+
+- When saving a edited MAP file, format can be chosen using a MAP/MAP2 combo box. Save feature has a safeguard to avoid saving with MAP format if map is using indexes > 255.
+
+- Includes a button in Editor's main menu to Batch-convert all MAPs loaded by the mod to MAP2 format. They will be stored in mod/MAPS folder so, in order to be used, same-name MAP files must be removed from all MAP folders (mod, standard/xcom1, UFO)
+
+- Terrain definitions can include now more MCD files, in order to have more than 255 different tiles. Just add more MCD files names at terrain ruleset definition.
+
+- MAP/MAP2 files can be mixed in a terrain ruleset, but if a MAP file uses a tile with index > 255 it will be displayed incorrectly. So it's better to load first MCD files with info for MAP files and then
+the extra tiles for MAP2 blocks.
+
+###Fixed some bugs at original version:
+- When opening Editor and FileBrowser, later in-game  battlescape could crash, due to not deleting editor Object. 
+- FileBrowser only shows now MAP/MAP2 files to avoid trying to load inadequate files.
+
+###TODO:
+- Filebrowser only shows MAP/MAP2 at user folder. A new feature would allow exploring more folders/subfolders and loading map files found.
+
 ## Installation
 
 OpenXcom requires a vanilla copy of the X-COM resources -- from either or both

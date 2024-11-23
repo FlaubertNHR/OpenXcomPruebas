@@ -48,6 +48,7 @@ class ArrowButton;
 class TextButton;
 class TextEdit;
 class TextList;
+class ComboBox;
 class Frame;
 
 class FileBrowserState : public State
@@ -59,10 +60,12 @@ private:
     Window *_window;
     Text *_txtTitle, *_txtDirectory, *_txtSearch;
     Text *_txtFilename, *_txtFiletype, *_txtFiledate;
+    Text *_txtFileType;;
     ArrowButton *_sortName, *_sortType, *_sortDate;
     TextButton *_btnCut, *_btnCopy, *_btnPaste, *_btnDelete, *_btnClose;
     std::vector<TextButton*> _rightClickMenu;
     TextButton *_btnOk, *_btnCancel;
+    ComboBox *_cbxFileType;
     TextEdit *_edtQuickSearch;
     TextList *_lstBrowser;
     Frame *_frameBrowser;
@@ -75,6 +78,7 @@ private:
     bool _mouseOverRightClickMenu;
     std::string _directoryToCopyFrom;
     std::vector<std::string> _filesToCopy;
+    std::vector<std::string> _fileExtensions;    
     bool _moveFiles;
 
 public:
@@ -84,8 +88,8 @@ public:
     ~FileBrowserState();
     /// Initializes the data in the File Browser window
     void init() override;
-	/// Handles keypresses.
-	void handle(Action *action) override;
+    /// Handles keypresses.
+    void handle(Action *action) override;
     /// Populates the list of files and folders in the browser
     void populateBrowserList(std::string directory, bool forceRefresh = false);
     /// Highlights selected files in the browser window
@@ -118,6 +122,8 @@ public:
     void btnOkClick(Action *action);
     /// Returns to the Main Menu
     void btnCancelClick(Action *action);
+    /// Handler for changing the file type combo box.   
+    void cbxFileTypeChange(Action *action);
 
 };
 

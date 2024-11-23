@@ -30,6 +30,7 @@ namespace OpenXcom
 struct MapFileInfo
 {
 	std::string name;
+	std::string extension;    
 	std::string baseDirectory;
 	std::vector<std::string> mods;
     std::string terrain;

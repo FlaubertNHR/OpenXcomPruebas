@@ -212,8 +212,8 @@ public :
     /// Gets the full path to a RMP file we're loading
     std::string getFullPathToRMPToLoad();
     /// Updates the file data on the current map
-    void updateMapFileInfo(std::string mapName, std::string baseDirectory, std::string terrainName);
-    void updateMapFileInfo(std::string fullPath, std::string terrainName = "");
+    void updateMapFileInfo(std::string mapName, std::string baseDirectory, std::string fileExtension, std::string terrainName);
+    void updateMapFileInfo(std::string fullPath, std::string fileExtension, std::string terrainName = "");
     void updateMapFileInfo();
     /// Checks whether a directory has been set for the current map file
     bool currentMapFileNeedsDirectory();
@@ -228,6 +228,12 @@ public :
     std::string getBaseDirectory(std::string fullPath);
     /// Helper function to get the full directory of a MAP/RMP file
     std::string getMAPorRMPDirectory(std::string baseDirectory, std::string mapName, bool rmpMode);
+
+    /// Gets the type of the map file to load
+    std::string getMapFileToLoadType();
+    /// Sets the type of the map file to load
+    void setMapFileToLoadType(std::string type);
+
 };
 
 }
