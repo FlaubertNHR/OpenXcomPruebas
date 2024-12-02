@@ -286,16 +286,6 @@ int RuleCraft::getMarker() const
 }
 
 /**
- * Returns the hangar type id in which
- * craft can be allocated.
- * @return hangar type ID, -1 if none.
- */
-int RuleCraft::getHangarType() const	
-{
-	return _hangarType;
-}
-
-/**
  * Gets the maximum fuel the craft can contain.
  * @return The fuel amount.
  */
