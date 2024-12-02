@@ -12,6 +12,11 @@ and the [wiki](https://www.ufopaedia.org/index.php/OpenXcom).
 
 Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
+## Filter by Craft feature
+
+Add a new button at Agents screen which allows display agents onboard of
+specific craft/vehicles (or unassigned)
+
 ## Installation
 
 OpenXcom requires a vanilla copy of the X-COM resources -- from either or both
