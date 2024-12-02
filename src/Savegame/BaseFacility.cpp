@@ -36,6 +36,7 @@ BaseFacility::BaseFacility(const RuleBaseFacility *rules, Base *base) :
 	_ammo(0),
 	_ammoMissingReported(false),
 	_disabled(false),
+	_craftForDrawing(0),
 	_hadPreviousFacility(false)
 {
 }
@@ -267,55 +268,21 @@ void BaseFacility::setDisabled(bool disabled)
 }
 
 /**
-* Gets crafts vector, used for drawing facility.
- * @return crafts vector at the facility
+ * Gets craft, used for drawing facility.
+ * @return craft
  */
-std::vector<Craft *> BaseFacility::getCraftsForDrawing()
+Craft *BaseFacility::getCraftForDrawing() const
 {
-	return _craftsForDrawing;
+	return _craftForDrawing;
 }
 
 /**
- * Sets a vector of crafts, used for drawing facility.
- * @param vector of Crafts to copy to other facility, craftV
- */
- void BaseFacility::setCraftsForDrawing(std::vector<Craft*> craftV)
-{
-		_craftsForDrawing = craftV;
-}
-
-/**
- * Add another craft, used for drawing facility.
+ * Sets craft, used for drawing facility.
  * @param craft for drawing hangar.
  */
-void BaseFacility::addCraftForDrawing(Craft *craft)
+void BaseFacility::setCraftForDrawing(Craft *craft)
 {
-	_craftsForDrawing.push_back(craft);
-}
-
-/**
- * Delete an already included craft, used for drawing facility.
- * @param craft to delete
- */
-std::vector<Craft*>::iterator BaseFacility::delCraftForDrawing(Craft *craft)
-{
-	std::vector<Craft*>::iterator c;
-	for (c = _craftsForDrawing.begin(); c != _craftsForDrawing.end(); ++c)
-	{
-		if (*c == craft)
-		{
-			return _craftsForDrawing.erase(c);
-		}
-	}
-	return c;
-}
-
-/**
- * Clear vector of crafts at the facility
- */
-void BaseFacility::clearCraftsForDrawing()
-{
-	_craftsForDrawing.clear();
+	_craftForDrawing = craft;
 }
 
 /**

@@ -25,7 +25,6 @@ namespace OpenXcom
 class Base;
 class SurfaceSet;
 class BaseFacility;
-class Craft;
 class RuleBaseFacility;
 class Font;
 class Language;
@@ -45,8 +44,7 @@ private:
 
 	Base *_base;
 	SurfaceSet *_texture;
-	BaseFacility *_facilities[BASE_SIZE][BASE_SIZE], *_selFacility;
-	Craft *_selCraft;	
+	BaseFacility *_facilities[BASE_SIZE][BASE_SIZE], *_selFacility;	
 	Font *_big, *_small;
 	Language *_lang;
 	int _gridX, _gridY;
@@ -71,9 +69,7 @@ public:
 	/// Sets the texture for this base view.
 	void setTexture(SurfaceSet *texture);
 	/// Gets the currently selected facility.
-	BaseFacility *getSelectedFacility() const;
-	/// Gets the currently selected craft
-	Craft *getSelectedCraft() const;		
+	BaseFacility *getSelectedFacility() const;	
 	/// Prevents any mouseover bugs on dismantling base facilities before setBase has had time to update the base.
 	void resetSelectedFacility();
 	/// Gets the X position of the currently selected square.

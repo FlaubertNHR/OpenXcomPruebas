@@ -56,8 +56,7 @@ private:
 	std::vector<std::string> _cats;
 	size_t _vanillaCategories;
 	size_t _sel;
-	int _total, _pQty, _aQty;
-	std::map<int,int> _tCQty;	// map of crafts to transfers, as different types must be considered separate
+	int _total, _pQty, _cQty, _aQty;
 	double _iQty;
 	double _distance;
 	Uint8 _ammoColor;

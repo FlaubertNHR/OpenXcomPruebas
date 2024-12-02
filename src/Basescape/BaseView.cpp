@@ -95,8 +95,7 @@ void BaseView::initText(Font *big, Font *small, Language *lang)
 void BaseView::setBase(Base *base)
 {
 	_base = base;
-	_selFacility = 0;
-	_selCraft = 0;		
+	_selFacility = 0;	
 
 	// Clear grid
 	for (int x = 0; x < BASE_SIZE; ++x)
@@ -139,15 +138,6 @@ void BaseView::setTexture(SurfaceSet *texture)
 BaseFacility *BaseView::getSelectedFacility() const
 {
 	return _selFacility;
-}
-
-/**
- * Returns the craft the mouse is currently over.
- * @return Pointer to Craft facility (0 if none).
- */
-Craft *BaseView::getSelectedCraft() const
-{
-	return _selCraft;
 }
 
 /**
@@ -493,11 +483,7 @@ void BaseView::draw()
 		}
 	}
 
-	for (auto *craft : *_base->getCrafts())  // Reset 'assigned state' to crafts at base
-	{
-		craft->setIsAssignedToSlot(false);	
-		craft->setBaseEscapePosition(Position(-1,-1,-1)); // -1,-1,-1 is "craft not assigned"			
-	}	
+	auto craftIt = _base->getCrafts()->begin();
 
 	for (const auto* fac : *_base->getFacilities())
 	{
@@ -585,25 +571,20 @@ void BaseView::draw()
 		}
 
 		// Draw crafts
-		fac->clearCraftsForDrawing(); 
+		fac->setCraftForDrawing(0);
 		if (fac->getBuildTime() == 0 && fac->getRules()->getCrafts() > 0)
 		{
-			auto craftIt = _base->getCrafts()->begin();
-			for (const auto &p : fac->getRules()->getCraftSlots())
+			if (craftIt != _base->getCrafts()->end())
 			{			
-				while((craftIt != _base->getCrafts()->end()) && (((*craftIt)->getStatus() == "STR_OUT") ||  (*craftIt)->getIsAssignedToSlot() || (fac->getRules()->getHangarType() !=  (*craftIt)->getRules()->getHangarType())))
-						++craftIt;	
-				if ((craftIt != _base->getCrafts()->end()))
+				if ((*craftIt)->getStatus() != "STR_OUT")
 				{
 					Surface *frame = _texture->getFrame((*craftIt)->getSkinSprite() + 33);
 					int fx = (fac->getX() * GRID_SIZE + (fac->getRules()->getSizeX() - 1) * GRID_SIZE / 2 + 2);
 					int fy = (fac->getY() * GRID_SIZE + (fac->getRules()->getSizeY() - 1) * GRID_SIZE / 2 - 4);
 					frame->blitNShade(this, fx, fy);
-					fac->addCraftForDrawing(*craftIt);
-					(*craftIt)->setIsAssignedToSlot(true);
+					fac->setCraftForDrawing(*craftIt);
 				}
-				else
-					break;
+				++craftIt;
 			}	
 		}
 
