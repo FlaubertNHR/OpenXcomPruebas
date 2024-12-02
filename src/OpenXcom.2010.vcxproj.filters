@@ -1151,6 +1151,16 @@
     <ClCompile Include="Battlescape\ExperienceOverviewState.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
+    <ClCompile Include="Battlescape\MapEditor.cpp" />
+    <ClCompile Include="Battlescape\MapEditorState.cpp" />
+    <ClCompile Include="Menu\FileBrowserState.cpp" />
+    <ClCompile Include="Menu\MapEditorFindNodeState.cpp" />
+    <ClCompile Include="Menu\MapEditorFindTileState.cpp" />
+    <ClCompile Include="Menu\MapEditorInfoState.cpp" />
+    <ClCompile Include="Menu\MapEditorMenuState.cpp" />
+    <ClCompile Include="Menu\MapEditorOptionsState.cpp" />
+    <ClCompile Include="Menu\MapEditorSetSizeState.cpp" />
+    <ClCompile Include="Savegame\MapEditorSave.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -2366,6 +2376,16 @@
     <ClInclude Include="Battlescape\ExperienceOverviewState.h">
       <Filter>Battlescape</Filter>
     </ClInclude>
+    <ClInclude Include="Battlescape\MapEditor.h" />
+    <ClInclude Include="Battlescape\MapEditorState.h" />
+    <ClInclude Include="Menu\FileBrowserState.h" />
+    <ClInclude Include="Menu\MapEditorFindNodeState.h" />
+    <ClInclude Include="Menu\MapEditorFindTileState.h" />
+    <ClInclude Include="Menu\MapEditorInfoState.h" />
+    <ClInclude Include="Menu\MapEditorMenuState.h" />
+    <ClInclude Include="Menu\MapEditorOptionsState.h" />
+    <ClInclude Include="Menu\MapEditorSetSizeState.h" />
+    <ClInclude Include="Savegame\MapEditorSave.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Geoscape">
