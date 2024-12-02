@@ -411,14 +411,15 @@ void SoldiersState::initList(size_t scrl)
 		RuleSoldierTransformation *transformationRule = _game->getMod()->getSoldierTransformation(selAction);
 		if (transformationRule)
 		{
-			for(size_t i=0; i< _base->getSoldiers()->size();++i)			
+			int idx = -1;	
+			for (auto* soldier : *_base->getSoldiers())
 			{
-				Soldier* soldier=_base->getSoldiers()->at(i);
-				if ((soldier->getCraft() && soldier->getCraft()->getStatus() == "STR_OUT") || 
+				idx++;
+				if ((soldier->getCraft() && (soldier->getCraft()->getStatus() == "STR_OUT")) || 
                   
-				    ((selectedCraftIndex  > 1) && soldier->getCraft() != _base->getCrafts()->at(selectedCraftIndex-2)) ||
+				    ((selectedCraftIndex  > 1) && (soldier->getCraft() != _base->getCrafts()->at(selectedCraftIndex-2))) ||
 					
-					(selectedCraftIndex == 1 )  && soldier->getCraft())
+					((selectedCraftIndex == 1 )  && soldier->getCraft()))
 				{
 					// soldiers outside of the base are not eligible
 					continue;
@@ -427,6 +428,7 @@ void SoldiersState::initList(size_t scrl)
 				{
 					_filteredListOfSoldiers.push_back(soldier);
 					_filteredIndicesOfSoldiers.push_back(idx);
+					_baseIndexSoldiers.push_back(idx); // NHR: It's necessary?				
 				}
 			}
 			for (auto* deadMan : *_game->getSavedGame()->getDeadSoldiers())
@@ -435,6 +437,7 @@ void SoldiersState::initList(size_t scrl)
 				{
 					_filteredListOfSoldiers.push_back(deadMan);
 					_filteredIndicesOfSoldiers.push_back(-1); // invalid
+					_baseIndexSoldiers.push_back(-1); //  NHR: It's necessary?					
 				}
 			}
 		}
