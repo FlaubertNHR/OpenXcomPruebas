@@ -36,9 +36,8 @@ BaseFacility::BaseFacility(const RuleBaseFacility *rules, Base *base) :
 	_ammo(0),
 	_ammoMissingReported(false),
 	_disabled(false),
-	_craftForDrawing(0),
-	_hadPreviousFacility(false),
-	_craftsForDrawing()
+	_craftsForDrawing(),
+	_hadPreviousFacility(false)
 {
 }
 

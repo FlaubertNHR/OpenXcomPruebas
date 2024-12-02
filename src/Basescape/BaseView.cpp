@@ -695,7 +695,7 @@ void BaseView::mouseOver(Action *action, State *state)
 					}
 				}
 		} 					
-		if (_selSize > 0)
+		if (_selSizeX > 0 && _selSizeY > 0)
 		{
 			if (_gridX + _selSizeX - 1 < BASE_SIZE && _gridY + _selSizeY - 1 < BASE_SIZE)
 			{
