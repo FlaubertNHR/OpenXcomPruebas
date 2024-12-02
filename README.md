@@ -18,7 +18,9 @@ This is a fork from official master of OXCE+ which allows some new features whic
 have been rejected by official OXCE+ developers. Currently there are 2 new features
 implemented:
 
-### More than 8 bases
+### Major changes/features
+
+#### More than 8 bases
 
 Now, player can choose the limit of available bases to build using a new entry in
 file 'openxcom.cfg': 
@@ -29,7 +31,7 @@ Default is 8 bases.
 If more than the 8 visible bases, player can scroll bases miniview using RMB at the 
 edges of the miniview. A blue arrow appears when there are more bases at either edge.
  
-### Hangars reworked 
+#### Hangars reworked 
 Every hangar and craft has a "hangarType" tag, so a Hangar with an specific "hangarType"
 value can only store crafts with the same "hangarType". "hangaType" tag can be given 
 at both facilities and crafts, in their corresponding YAML ruleset. If no tag is given, 
@@ -47,6 +49,29 @@ they want to place crafts in an hangar which allows more than one.
 An "example MOD" is included in "Examples" folder. Though this mod is a submod of the
 fantastic master mod "The Xcom Files", you can adapt it to any other mod or vanilla 
 game, which needed using differentiated hangars and/or more than 1 craft per hangar.
+
+### Minor changes/features
+
+#### PopUp Screen when soldier recovered
+When a soldier full recovers health/wounds  or sanity, a popup apperars
+on Geoscape screen to warn it.
+
+#### Change agents' stats display
+Agent's stats for health, mana, strength and psiSkill will not consider armor that
+agent is wearing at that moment.
+
+#### Show recovery values for agents due to commendations
+Vanilla OXCE+ just shows if an agent recovers strength, energy, morale, health, etc
+every turn. With this change, agent info will show how many extra recovery has agent
+earned in each category, due to commendations.
+
+#### Change item click in Sell/Sack Screen
+From now on MMB takes to UFOpaedia entry of item (if researched or not researchable), 
+while Ctrl+MMB takes to Tree Tech Viewer
+
+#### Filter By Craft feature
+New combo box button at Agents screen to show agents onboard a selected craft
+
 
 ### Windows Binary
 
