@@ -46,7 +46,6 @@ private:
 	Base *_base;
 	SurfaceSet *_texture;
 	BaseFacility *_facilities[BASE_SIZE][BASE_SIZE], *_selFacility;
-	Craft *_selCraft;	
 	Font *_big, *_small;
 	Language *_lang;
 	int _gridX, _gridY;
@@ -57,6 +56,7 @@ private:
 	Uint8 _redColor, _yellowColor, _greenColor;
 	bool _highContrast;
 	Uint8 _cellColor, _selectorColor;
+	Craft *_selCraft;		
 	/// Updates the neighborFacility's build time. This is for internal use only (reCalcQueuedBuildings()).
 	void updateNeighborFacilityBuildTime(BaseFacility* facility, BaseFacility* neighbor);
 public:
