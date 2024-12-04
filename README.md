@@ -14,7 +14,7 @@ Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
 ## 'Hangars Reworked' fork
 
-OpenXcom "Hangars reworked" is a fork from official master of OXCE+ which allows 
+OpenXcom "Hangars reworked" is a fork from official master of OXCE which allows 
 some new features related to Hangars' behavior. In this fork, every hangar and 
 craft has a "hangarType" tag, so a Hangar with an specific "hangarType" value can
 only store crafts with the same "hangarType". "hangaType" tag can be given at both,
@@ -43,7 +43,7 @@ intensively tested
 You can just place this binary in the same folder than the original one, and just click
 it when you want start the game with HangarsReworked features.
 
-OXCE+ developers are working hard to add similar features to official OXCE, so when 
+OXCE developers are working hard to add similar features to official OXCE, so when 
 they are done, this fork will be left over obsolete. But meanwhile, you can enjoy
 testing new possibilities for your mods or regular playthroughs. 
 
