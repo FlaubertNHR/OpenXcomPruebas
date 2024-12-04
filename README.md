@@ -14,8 +14,8 @@ Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
 ## 'Rejected features' fork
 
-This is a fork from official master of OXCE+ which allows some new features which
-have been rejected by official OXCE+ developers. Currently there are 2 new features
+This is a fork from official master of OXCE which allows some new features which
+have been rejected by official OXCE developers. Currently there are 2 new features
 implemented:
 
 ### Major changes/features
@@ -61,7 +61,7 @@ Agent's stats for health, mana, strength and psiSkill will not consider armor th
 agent is wearing at that moment.
 
 #### Show recovery values for agents due to commendations
-Vanilla OXCE+ just shows if an agent recovers strength, energy, morale, health, etc
+Vanilla OXCE just shows if an agent recovers strength, energy, morale, health, etc
 every turn. With this change, agent info will show how many extra recovery has agent
 earned in each category, due to commendations.
 
