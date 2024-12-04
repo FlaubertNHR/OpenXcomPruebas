@@ -21,7 +21,7 @@ This way the max. quantity of different tiles used to build a MAP is upped to 65
 precedence over MAP2; so, in order to use a MAP2 version, make sure that MAP versions
 of the block are removed at all folders explored by the application (user/mod/<modname>/MAPS, 
 standard/xcom1/MAPS,  standard/xcom2/MAPS and UFO/MAPS).
-- Terrain definitions can include now more MCD files, in order to have more than 255 different tiles. 
+- Terrain definitions can include now more MCD files, in order to have more than 253 different tiles. 
 Just add more MCD files names at the terrain ruleset definition.
 - MAP/MAP2 files can be mixed in a terrain ruleset, but if a MAP file uses a tile with index > 255 it
 will be displayed incorrectly. So it's better to load first MCD files with info for MAP files and then
@@ -31,10 +31,9 @@ In order to generate a MAP2 version from a MAP file or create a new MAP/MAP2 fil
 modified versión of battlescape-editor (by Ohartenstein23) can be used. This version can be
 found at https://github.com/FlaubertNHR/OpenXcomPruebas/tree/battlescape-editor_MAP-MAP2.
 The modified battlescape-editor includes a button to batch-generate MAP2 versions for
-all the MAP files used at a loaded MOD. These MAP2 files will be placed in the /MAPS folder
-of the active mod, but equivalent MAP files should be manually removed to allow
-OXCE to load MAP2 instead of MAP.
-
+all the MAP files used at a loaded MOD. These MAP2 files will be placed in the /user/[mod]/
+folder, so they should be copied to MOD's /MAP folder, and equivalent MAP files should be manually
+removed to allow OXCE to load MAP2 files instead of MAP ones.
 
 ## Installation
 
