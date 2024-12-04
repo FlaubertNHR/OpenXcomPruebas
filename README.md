@@ -14,7 +14,7 @@ Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
 ## MAP2 support
 
-This forked version of OXCE+ introduces support for a new format for map files,
+This forked version of OXCE introduces support for a new format for map files,
 called MAP2. MAP2 format stores map info using uint16 (2 bytes) data instead of char (8 bits). 
 This way the max. quantity of different tiles used to build a MAP is upped to 65535.
 - In case of map files with the same name and different format, MAP files will have
@@ -33,7 +33,7 @@ found at https://github.com/FlaubertNHR/OpenXcomPruebas/tree/battlescape-editor_
 The modified battlescape-editor includes a button to batch-generate MAP2 versions for
 all the MAP files used at a loaded MOD. These MAP2 files will be placed in the /MAPS folder
 of the active mod, but equivalent MAP files should be manually removed to allow
-OXCE+ to load MAP2 instead of MAP.
+OXCE to load MAP2 instead of MAP.
 
 
 ## Installation
