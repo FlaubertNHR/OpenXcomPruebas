@@ -35,6 +35,14 @@ all the MAP files used at a loaded MOD. These MAP2 files will be placed in the /
 folder, so they should be copied to MOD's /MAP folder, and equivalent MAP files should be manually
 removed to allow OXCE to load MAP2 files instead of MAP ones.
 
+Furthermore a modified version of MapView2 (by KevL) can be obtained from here: https://github.com/FlaubertNHR/OpenXCOM.ToolsMAP2 This version can load, edit and create map files in both MAP and MAP2 format.
+
+For convenience, windows binaries (32 and 64 bits) have been added to folder 'WindowsBinaries'. These EXEs have been tested to work in a Windows11 machine (64 bits).
+
+[Link to Windows Binary folder](WindowsBinaries/)
+
+You can just place one of these EXEs in the same folder than the original openxcom.exe and just click it when you want start the game with MAP2 format support.
+
 ## Installation
 
 OpenXcom requires a vanilla copy of the X-COM resources -- from either or both
