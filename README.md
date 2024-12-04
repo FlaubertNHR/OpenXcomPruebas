@@ -34,14 +34,10 @@ An "example MOD" is included in "Examples" folder. Though this mod is a submod o
 fantastic master mod "The Xcom Files", you can adapt it to any other mod or vanilla 
 game, which needs using differentiated hangars and/or more than 1 craft per hangar.
 
-For convenience, a windows binary has been added to folder 'WindowsBinaries'. This exe 
-has been tested to work in a Windows10 machine (64 bits), thought it has not been
-intensively tested 
+For convenience, windows packages (32 and 64bits) have been added to folder 'WindowsBinaries'. These packages
+include all files needed to run this fork of OXCE; they have been tested to work in a Windows11 machine (64 bits).
 
-[Link to Windows Binaryt](WindowsBinaries/openxcomHangars.exe)
-
-You can just place this binary in the same folder than the original one, and just click
-it when you want start the game with HangarsReworked features.
+[Link to Windows Binaries](WindowsBinaries/)
 
 OXCE developers are working hard to add similar features to official OXCE, so when 
 they are done, this fork will be left over obsolete. But meanwhile, you can enjoy
