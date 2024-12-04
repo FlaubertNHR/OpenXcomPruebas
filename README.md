@@ -12,7 +12,7 @@ and the [wiki](https://www.ufopaedia.org/index.php/OpenXcom).
 
 Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
-## More than 8 bases fork
+## More than 8 bases OXCE fork
 
 Now, player can choose the limit of available bases to build using a new entry in
 file 'options.cfg': 
@@ -22,6 +22,12 @@ oxceMaxBases = maxNumBases
 Default is 8 bases.
 If more than the 8 visible bases, player can scroll bases miniview using RMB at the 
 edges of the miniview. A blue arrow appears when there are more bases at either edge.
+
+For convenience, windows binaries (32 and 64 bits) have been added to folder 'WindowsBinaries'. These EXEs have been tested to work in a Windows11 machine (64 bits).
+
+[Link to Windows Binary folder](WindowsBinaries/)
+
+You can just place one of these EXEs in the same folder than the original openxcom.exe and just click it when you want start the game with MoreThan8Bases feature.
 
 
 ## Installation
