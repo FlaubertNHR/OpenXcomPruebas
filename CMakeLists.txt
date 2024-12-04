@@ -34,7 +34,7 @@ if ( CHECK_CCACHE )
   endif()
 endif ()
 
-if ( WIN32 )
+if ( WIN32 AND NOT CMAKE_CROSSCOMPILING )
   set ( default_deps_dir "${CMAKE_SOURCE_DIR}/deps" )
 endif ()
 
@@ -84,8 +84,8 @@ endif ()
 # Include rapidyaml lib
 include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml)
 
-if(NOT UNIX AND IS_DIRECTORY ${DEPS_DIR})
-   include_directories ( ${DEPS_DIR}/include/SDL ${DEPS_DIR}/include )
+if(NOT UNIX AND NOT CMAKE_CROSSCOMPILING AND IS_DIRECTORY ${DEPS_DIR})
+   include_directories ( ${DEPS_DIR}/include/SDL ${DEPS_DIR}/include/yaml-cpp ${DEPS_DIR}/include )
    if ( CMAKE_CL_64 )
      link_directories ( ${DEPS_DIR}/lib/x64 )
    else ( )
