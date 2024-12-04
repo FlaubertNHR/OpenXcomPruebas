@@ -32,7 +32,7 @@ Battlescape Editor by ohartenstein23
  - Searching of text lists in the Map Editor Menu
  - Find and replace tools for searching and editing tile and node content
 
-Documentatation can be found [here](https://openxcom.org/forum/index.php?action=dlattach;topic=8711.0;attach=53017).
+Documentation can be found [here](https://openxcom.org/forum/index.php?action=dlattach;topic=8711.0;attach=53017).
 
 ## Battlescape Editor MAP/MAP2 fork
 
@@ -46,7 +46,8 @@ It allows using old MAP and also new MAP2 versions of terrain blocks. MAP2 info 
 
 - When saving a edited MAP file, format can be chosen using a MAP/MAP2 combo box. Save feature has a safeguard to avoid saving with MAP format if map is using indexes > 255.
 
-- Includes a button in Editor's main menu to Batch-convert all MAPs loaded by the mod to MAP2 format. They will be stored in mod/MAPS folder so, in order to be used, same-name MAP files must be removed from all MAP folders (mod, standard/xcom1, UFO)
+- Includes a button in Editor's main menu to Batch-convert all MAPs loaded by the mod to MAP2 format. They will be stored in /user/mod/ folder so, in order to be used, same-name MAP files must be removed from all MAP folders (mod, standard/xcom1, UFO)
+  and new MAP2 files should be placed in mod's MAP folder instead.
 
 - Terrain definitions can include now more MCD files, in order to have more than 255 different tiles. Just add more MCD files names at terrain ruleset definition.
 
