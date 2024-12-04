@@ -818,28 +818,35 @@ void MapEditorMenuState::btnConvertClick(Action *action)
         // Options::getActiveMasterInfo()->getPath() --> ./user/ to save MAP2 files in user folder
         outfilename = Options::getActiveMasterInfo()->getPath() + "/MAPS/" + cadena + ".MAP2";	
 
-		mapFile = FileMap::getIStream(infilename);  
-	    mapFile->read((char*)&size, sizeof(size));
-	    sizey = (int)size[0];
-	    sizex = (int)size[1];
-	    sizez = (int)size[2];        
+		if (FileMap::fileExists(infilename))
+		{
+			mapFile = FileMap::getIStream(infilename);
+			mapFile->read((char*)&size, sizeof(size));
+			sizey = (int)size[0];
+			sizex = (int)size[1];
+			sizez = (int)size[2];
 
-        data16.push_back((uint16_t)sizey);
-        data16.push_back((uint16_t)sizex);  
-        data16.push_back((uint16_t)sizez);    
-        // Read tiles info   
-        while (mapFile->read((char*)&value, sizeof(value)))
-        {
-            data16.push_back((uint16_t)value);
-        }       
-	    if (!mapFile->eof())
-	    {
-		    throw Exception("Invalid MAP file: " + infilename);
-	    }
-        if (!CrossPlatform::writeFile(outfilename, data16))
-        {
-                throw Exception("Failed to save " + outfilename);
-        }            
+			data16.push_back((uint16_t)sizey);
+			data16.push_back((uint16_t)sizex);
+			data16.push_back((uint16_t)sizez);
+			// Read tiles info
+			while (mapFile->read((char*)&value, sizeof(value)))
+			{
+				data16.push_back((uint16_t)value);
+			}
+			if (!mapFile->eof())
+			{
+				throw Exception("Invalid MAP file: " + infilename);
+			}
+			if (!CrossPlatform::writeFile(outfilename, data16))
+			{
+				throw Exception("Failed to save " + outfilename);
+			}
+		}
+		else
+		{
+			Log(LOG_INFO) << "File " << cadena << " doesn't exist or is in MAP2 format. Skipping conversion";
+		}
     }
 
 }
