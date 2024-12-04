@@ -103,14 +103,16 @@ void MapEditorSave::save()
 
         node["savedMapFiles"].push_back(fileData);
     }
-
-    out << node;
-
-    std::string filename = MAINSAVE_MAPEDITOR;
-	std::string filepath = Options::getMasterUserFolder() + filename;
-	if (!CrossPlatform::writeFile(filepath, out.c_str()))
+	if (node.IsMap())
 	{
-		throw Exception("Failed to save " + filepath);
+		out << node;
+
+		std::string filename = MAINSAVE_MAPEDITOR;
+		std::string filepath = Options::getMasterUserFolder() + filename;
+		if (!CrossPlatform::writeFile(filepath, out.c_str()))
+		{
+			throw Exception("Failed to save " + filepath);
+		}
 	}
 }
 
