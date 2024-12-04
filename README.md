@@ -15,7 +15,7 @@ Uses modified code from SDL\_gfx (LGPL) with permission from author.
 ## Battlescape Editor
 
 Battlescape Editor by ohartenstein23
- (https://github.com/ohartenstein23/OpenXcom/tree/battlescape-editor) is a fork from original OXCE+ which allows editing MAP files
+ (https://github.com/ohartenstein23/OpenXcom/tree/battlescape-editor) is a fork from original OXCE which allows editing MAP files
  Main features are:
  - Editing of maps included in the currently loaded set of mods
  - Creating new maps from the terrains defined in the currently loaded set of mods
