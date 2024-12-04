@@ -816,7 +816,7 @@ void MapEditorMenuState::btnConvertClick(Action *action)
         std::string cadena = i.first;
         infilename = "MAPS/" + cadena + ".MAP";	
         // Options::getActiveMasterInfo()->getPath() --> ./user/ to save MAP2 files in user folder
-        outfilename = Options::getActiveMasterInfo()->getPath() + "/MAPS/" + cadena + ".MAP2";	
+		outfilename = Options::getMasterUserFolder() + cadena + ".MAP2";	
 
 		if (FileMap::fileExists(infilename))
 		{
