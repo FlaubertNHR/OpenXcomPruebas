@@ -54,12 +54,15 @@ It allows using old MAP and also new MAP2 versions of terrain blocks. MAP2 info 
 - MAP/MAP2 files can be mixed in a terrain ruleset, but if a MAP file uses a tile with index > 255 it will be displayed incorrectly. So it's better to load first MCD files with info for MAP files and then
 the extra tiles for MAP2 blocks.
 
-###Fixed some bugs at original version:
+### Fixed some bugs at original version:
 - When opening Editor and FileBrowser, later in-game  battlescape could crash, due to not deleting editor Object. 
 - FileBrowser only shows now MAP/MAP2 files to avoid trying to load inadequate files.
+- If MapEditor windows was closed without saving a MAP, it crashed trying to generate a mapeditor.sav file, which 
+  should be then deleted in order to start Editor again.   
 
-###TODO:
-- Filebrowser only shows MAP/MAP2 at user folder. A new feature would allow exploring more folders/subfolders and loading map files found.
+For convenience, windows packages have been added to folder 'WindowsBinaries'. Packages include files needed for OXCE basic install (common, standard and user folders) but resources from original games must be placed in UFO and TFTD folders. An example folder has been provided with instructions and files to test MAP2 files use. 
+
+[Link to Windows Binary folder](WindowsBinaries/)
 
 ## Installation
 
