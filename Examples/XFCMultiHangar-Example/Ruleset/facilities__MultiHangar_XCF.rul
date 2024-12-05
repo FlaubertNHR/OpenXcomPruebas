@@ -1,0 +1,38 @@
+facilities:
+  - type: STR_HANGARX4_3X3
+    spriteShape: 910
+    size: 3
+    buildCost: 3250000
+    buildTime: 26
+    monthlyCost: 65000
+    hangarType: 1
+    crafts: 4
+    craftSlots:
+      - [-17, -17, 0]
+      - [17, -17, 0]
+      - [-17, 17, 0]
+      - [17, 17, 0]
+    workshops: 50
+    storage: 50
+    aliens: 20
+    prisonType: 4
+    mapName: XBLH_01
+    listOrder: 7262
+    canBeBuiltOver: true
+    buildOverFacilities:
+      - STR_GARAGE
+      - STR_HANGAR
+  - type: STR_GARAGE
+    spriteShape: 1
+    spriteFacility: 890
+    size: 1
+    buildCost: 100000
+    buildTime: 12
+    monthlyCost: 15000
+    hangarType: 0 
+    crafts: 1
+    craftSlots:
+      - [-2, 0, 0]
+    mapName: XCFG_00
+    workshops: 2
+ 

@@ -1,0 +1,7 @@
+en-US:
+  STR_GARAGE: "Garage"
+  STR_GARAGE_UFOPEDIA: "Garage facility, to store small cars {NEWLINE}{NEWLINE}Properties: {NEWLINE}{NEWLINE}> Hangar Type: 0 (Cars) {NEWLINE}> Craft Capacity: 1       {NEWLINE}> Workshop: 5{NEWLINE}> Storage: 25"
+  STR_HANGARX4_3X3: "Hangar x4"
+  STR_HANGARX4_3X3_UFOPEDIA: "Upgraded version of the Hangar building, which has similar features, but with larger 4x craft capacity. Base space requirement is 3x3 base blocks.{NEWLINE}{NEWLINE}Properties:                   Craft Capacity: 4{NEWLINE}> Workshop: 50{NEWLINE}> Storage: 50"
+  
+

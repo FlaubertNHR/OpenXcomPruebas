@@ -1,0 +1,10 @@
+ufopaedia:
+  - id: STR_GARAGE
+    type_id: 6
+    section: STR_BASE_FACILITIES
+    text: STR_GARAGE_UFOPEDIA
+  - id: STR_HANGARX4_3X3
+    type_id: 6
+    section: STR_BASE_FACILITIES
+    text: STR_HANGARX4_3X3_UFOPEDIA
+

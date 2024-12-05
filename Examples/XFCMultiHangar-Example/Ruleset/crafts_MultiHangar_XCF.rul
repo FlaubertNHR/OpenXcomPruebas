@@ -1,0 +1,22 @@
+crafts:
+  - type: STR_OPSCAR
+    hangarType: 0 
+    sprite: 871    
+  - type: STR_VAN
+    sprite: 829    
+    hangarType: 0  
+  - type: STR_HUMMER
+    sprite: 870      
+    hangarType: 1   
+  - type: STR_CIVILIAN_CAR   
+    sprite: 832  
+    hangarType: 0 
+  - type: STR_LUXURY_CAR  
+    sprite: 867   
+    hangarType: 0    
+  - type: STR_HELICOPTER
+    hangarType: 1 	
+  - type: STR_LITTLE_BIRD
+    hangarType: 1 	
+  - type: STR_MUDRANGER
+    hangarType: 1
