@@ -1,0 +1,7 @@
+version: 1.0
+name: "[XCF] MultiHangar Example"
+id: MultiHangarEx
+author: FlaubertNHR #With parts from OxEBJC's Facility Expansion Pack
+description: "Example of multiHangar use. OXCE needed."
+master: x-com-files
+

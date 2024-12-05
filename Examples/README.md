@@ -14,3 +14,10 @@ facility in-game. Its UEFOPAEDIA entry is also included.
 
 Finally a slightly modified starting base has been also included, so
 you initially begin with just 2 garages, instead of two hangars.
+
+# XFCMultiHangar-MOD Example
+This other mod adds another one to the garage facility; a 3x3 Hangar 
+with capacity for 4 crafts. Some crafts has been adapted so they can
+be stored in the facility (see .rul files in Ruleset folder). This mod
+uses elements from 0xJEBC's Facility Pack.
+

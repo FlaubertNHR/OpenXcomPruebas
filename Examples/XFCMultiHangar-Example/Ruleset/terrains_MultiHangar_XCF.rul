@@ -1,0 +1,51 @@
+terrains:
+  - name: XBASE
+    addOnly: true
+    mapDataSets:
+      - BLANKS
+      - XBASE1
+      - XBASE2
+      - XCOMWALL
+      - XCOMBITS
+      - GARAGE_STUFF 
+    mapBlocks:
+      - name: XCFG_00
+        width: 10
+        length: 10
+        height: 2
+      - name: XBLH_01 # Hangar 3x3
+        width: 10
+        length: 10
+        height: 2
+      - name: XBLH_02
+        width: 10
+        length: 10
+        height: 2
+      - name: XBLH_03
+        width: 10
+        length: 10
+        height: 2
+      - name: XBLH_04
+        width: 10
+        length: 10
+        height: 2
+      - name: XBLH_05
+        width: 10
+        length: 10
+        height: 2
+      - name: XBLH_06
+        width: 10
+        length: 10
+        height: 2
+      - name: XBLH_07
+        width: 10
+        length: 10
+        height: 2
+      - name: XBLH_08
+        width: 10
+        length: 10
+        height: 2
+      - name: XBLH_09
+        width: 10
+        length: 10
+        height: 2
