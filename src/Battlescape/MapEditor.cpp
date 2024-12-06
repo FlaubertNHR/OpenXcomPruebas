@@ -30,6 +30,7 @@
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Tile.h"
 #include <sstream>
+#include "../Engine/State.h"
 
 namespace OpenXcom
 {
@@ -981,11 +982,13 @@ bool MapEditor::currentMapFileNeedsDirectory()
  */
 void MapEditor::saveMapFile()
 {
-    std::string message = "STR_MAP_EDITOR_SAVED_SUCCESSFULLY";
+   // std::string message = "STR_MAP_EDITOR_SAVED_SUCCESSFULLY";
     std::string filename = _mapSave->getCurrentMapFile()->name;
     std::string fileType =  _mapSave->getCurrentMapFile()->extension;
     std::string filepath = _mapSave->getCurrentMapFile()->baseDirectory;
     std::string logInfo = "\n    mapDataSets:\n";
+	State* fakeSt = new State();
+	std::string message = fakeSt->tr("STR_MAP_EDITOR_SAVED_SUCCESSFULLY").arg(fileType);
     bool fileisMAP;
     bool saveOk = true;
     if(fileType.compare(".MAP") == 0)
