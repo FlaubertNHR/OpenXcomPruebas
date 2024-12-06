@@ -1065,6 +1065,7 @@ void MapEditor::saveMapFile()
                         {
                             message = "STR_MAP_EDITOR_SAVED_FAILED";
                             saveOk = false;
+                            _mapSave->getCurrentMapFile()->baseDirectory ="null";
                         }
                     }
                     else
