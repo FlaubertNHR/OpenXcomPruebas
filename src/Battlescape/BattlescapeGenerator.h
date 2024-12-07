@@ -109,6 +109,8 @@ private:
 	void reloadFixedWeaponsByLayout();
 	/// Loads an XCom MAP file.
 	int loadMAP(MapBlock *mapblock, int xoff, int yoff, int zoff, RuleTerrain *terrain, int objectIDOffset, bool discovered = false, bool craft = false, int ufoIndex = -1);
+	/// Loads an XCom MAP2 file.
+	int loadMAP2(MapBlock *mapblock, int xoff, int yoff, int zoff, RuleTerrain *terrain, int objectIDOffset, bool discovered = false, bool craft = false, int ufoIndex = -1);
 	/// Loads an XCom RMP file.
 	void loadRMP(MapBlock *mapblock, int xoff, int yoff, int zoff, int segment);
 	/// Checks a terrain requested by a command and loads it if necessary

@@ -142,6 +142,8 @@ en-GB:
 #SoldierTransformState.cpp
   STR_SELECT_TRANSFORMATION_FOR: "SELECT TRANSFORMATION FOR{NEWLINE}{0}"
   STR_TRANSFORMATIONS_BUTTON: "^"
+  STR_NO_CRAFT_FILTER: "No Craft Filter"
+  STR_NOT_ASSIGNED: "Unassigned"
 #SoldierTransformationAssignState.cpp
   STR_TRANSFER_TIME: "Transfer Time>{ALT}{0}"
   STR_RECOVERY_TIME: "Recovery Time>{ALT}{0}"
@@ -499,6 +501,9 @@ en-GB:
 #TrainingFinishedState.cpp
   STR_TRAINING_FINISHED: "Training Finished{NEWLINE}at {0}"
   STR_PSI_TRAINING_FINISHED: "Psi Training Finished{NEWLINE}at {0}"
+#RecoveryFinishedState.cpp
+  STR_WOUNDS_RECOVERY_FINISHED: "Wounds Recovered{NEWLINE}at {0}"
+  STR_MANA_RECOVERY_FINISHED: "Mana Recovered{NEWLINE}at {0}"
 #UfoDetectedState.cpp
   STR_IGNORE_UC: "IGNORE"
 #UfoTrackerState.cpp
