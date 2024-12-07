@@ -12,13 +12,40 @@ and the [wiki](https://www.ufopaedia.org/index.php/OpenXcom).
 
 Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
-## 'Rejected features' fork
+## OXCE-Flauber fork
 
 This is a fork from official master of OXCE which allows some new features which
-have been rejected by official OXCE developers. Currently there are 2 new features
+I've developed and have not been included in official OXCE. Currently, these are the features
 implemented:
 
 ### Major changes/features
+
+#### MAP2 support
+
+This fork includes support for a new format for map files, called MAP2. MAP2 format stores map 
+info using uint16 (2 bytes) data instead of char (8 bits). This way the max. quantity of different
+tiles used to build a MAP is upped to 65535.
+- In case of map files with the same name and different format, MAP files will have
+precedence over MAP2; so, in order to use a MAP2 version, make sure that MAP versions
+of the block are removed at all folders explored by the application (user/mod/<modname>/MAPS
+ and UFO/MAPS).
+- Terrain definitions can include now more MCD files, in order to have more than 253 different 
+tiles. Just add more MCD files names at the terrain ruleset definition.
+- MAP/MAP2 files can be mixed in a terrain ruleset, but if a MAP file uses a tile with index > 255 it
+will be displayed incorrectly. So it's better to load first MCD files with info for MAP files and then
+the extra tiles for MAP2 blocks.
+
+In order to generate a MAP2 version from a MAP file or create a new MAP/MAP2 file a
+modified versión of Battlescape-Editor (by Ohartenstein23) can be used. This version can be
+found at https://github.com/FlaubertNHR/OpenXcomPruebas/tree/battlescape-editor_MAP-MAP2.
+The modified battlescape-editor includes a button to batch-generate MAP2 versions for
+all the MAP files used at a loaded MOD. These MAP2 files will be placed in the /user/[mod]/
+folder, so they should be copied to MOD's /MAP folder, and equivalent MAP files should be manually
+removed to allow OXCE to load MAP2 files instead of MAP ones.
+
+Furthermore a modified version of MapView2 (by KevL) can be obtained from here: 
+https://github.com/FlaubertNHR/OpenXCOM.ToolsMAP2 This version can load, edit and create map files
+in both MAP and MAP2 format.
 
 #### More than 8 bases
 
@@ -52,7 +79,7 @@ game, which needed using differentiated hangars and/or more than 1 craft per han
 
 ### Minor changes/features
 
-#### PopUp Screen when soldier recovered
+#### PopUp Screen when a soldier is recovered
 When a soldier full recovers health/wounds  or sanity, a popup apperars
 on Geoscape screen to warn it.
 
@@ -72,17 +99,13 @@ while Ctrl+MMB takes to Tree Tech Viewer
 #### Filter By Craft feature
 New combo box button at Agents screen to show agents onboard a selected craft
 
-
 ### Windows Binary
 
 For convenience, a ZIP file with windows binary has been added to folder 'WindowsBinaries'.
  This exe has been tested to work in a Windows10 machine (64 bits), thought it has not been
 intensively tested. It also include extra Language files needed for some specific features
 
-[Link to Windows Binary](/WindowsBinaries/UnzipInOXCEFolder.zip)
-
-You can just place the binary and folder in the game folder of the original one, and just click
-it when you want start the game with these new features.
+[Link to Windows Binary](/WindowsBinaries/)
 
 ## Installation
 
