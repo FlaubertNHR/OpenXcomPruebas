@@ -12,11 +12,11 @@ and the [wiki](https://www.ufopaedia.org/index.php/OpenXcom).
 
 Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
-## OXCE-Flauber fork
+## OXCE-Flaubert fork
 
 This is a fork from official master of OXCE which allows some new features which
 I've developed and have not been included in official OXCE. Currently, these are the features
-implemented:
+implemented at now:
 
 ### Major changes/features
 
@@ -41,7 +41,7 @@ found at https://github.com/FlaubertNHR/OpenXcomPruebas/tree/battlescape-editor_
 The modified battlescape-editor includes a button to batch-generate MAP2 versions for
 all the MAP files used at a loaded MOD. These MAP2 files will be placed in the /user/[mod]/
 folder, so they should be copied to MOD's /MAP folder, and equivalent MAP files should be manually
-removed to allow OXCE to load MAP2 files instead of MAP ones.
+removed to allow loading  MAP2 files instead of MAP ones.
 
 Furthermore a modified version of MapView2 (by KevL) can be obtained from here: 
 https://github.com/FlaubertNHR/OpenXCOM.ToolsMAP2 This version can load, edit and create map files
