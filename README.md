@@ -79,6 +79,12 @@ game, which needed using differentiated hangars and/or more than 1 craft per han
 
 ### Minor changes/features
 
+#### Changes in snipping/spotting mechanism
+If an enemy spotter is killed with one-shot, murder is not tagged by snipper/spotter
+mechanism.
+You can optionally set that atacking or hitting spotters no longer makes you
+ a valid target for enemy. It can be changed at MOD options.
+
 #### PopUp Screen when a soldier is recovered
 When a soldier full recovers health/wounds  or sanity, a popup apperars
 on Geoscape screen to warn it.
