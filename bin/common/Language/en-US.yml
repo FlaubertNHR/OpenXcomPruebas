@@ -428,3 +428,5 @@ en-US:
   STR_USER_FOLDER_DESC: "The log file ('openxcom.log') is stored here. All custom mods belong here too (in the 'mods' sub-folder)."
   STR_SAVE_FOLDER_DESC: "Your saved games are located here. Also, the mission generator settings ('battle.cfg') can be found here."
   STR_CONFIG_FOLDER_DESC: "This is where OpenXcom settings ('options.cfg') are stored. Normally the same as the User Folder."
+  STR_DISABLE_SNIPPER_SPOTTER_SHOT: "Disable snipper/spotter"
+  STR_DISABLE_SNIPPER_SPOTTER_SHOT_DESC: "Spotters cannot tag agents when hit by them"

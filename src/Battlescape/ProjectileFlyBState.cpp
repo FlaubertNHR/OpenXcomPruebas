@@ -1030,8 +1030,11 @@ void ProjectileFlyBState::projectileHitUnit(Position pos)
 			if (ai != 0)
 			{
 				ai->setWasHitBy(_unit);
-				_unit->setTurnsSinceSpotted(0);
-				_unit->setTurnsLeftSpottedForSnipers(std::max(victim->getSpotterDuration(), _unit->getTurnsLeftSpottedForSnipers()));
+				if (!(Options::disableSnipperSpotterShot	) && (victim->getHealth() > 0) && (victim->getStunlevel() < victim->getHealth())) // Victim neither DEAD  nor unconscious
+				{
+					_unit->setTurnsSinceSpotted(0);
+					_unit->setTurnsLeftSpottedForSnipers(std::max(victim->getSpotterDuration(), _unit->getTurnsLeftSpottedForSnipers()));
+				}
 			}
 		}
 	}

@@ -536,20 +536,20 @@ void createControlsOXCE()
 void createOptionsOTHER()
 {
 		// your fork's hidden options here
-	_info.push_back(OptionInfo(OPTION_OTHER,"showCraftHangar", &showCraftHangar, false, "STR_SHOW_CRAFT_HANGAR", "STR_GENERAL"));	
     _info.push_back(OptionInfo(OPTION_OTHER,"oxceMaxBases", &maxNumberOfBases, 8, "", "HIDDEN"));
 }
 
 void createAdvancedOptionsOTHER()
 {
 	// your fork's advanced options here
+	_info.push_back(OptionInfo(OPTION_OTHER,"showCraftHangar", &showCraftHangar, false, "STR_SHOW_CRAFT_HANGAR", "STR_GENERAL"));	
+	_info.push_back(OptionInfo(OPTION_OTHER,"DisableSnipperSpotterShot", &disableSnipperSpotterShot, false, "STR_DISABLE_SNIPPER_SPOTTER_SHOT", "STR_GENERAL"));	
 }
 
 void createControlsOTHER()
 {
 	// your fork's controls here
 }
-
 
 // we can get fancier with these detection routines, but for now just look for
 // *something* in the data folders.  case sensitivity can make actually verifying
