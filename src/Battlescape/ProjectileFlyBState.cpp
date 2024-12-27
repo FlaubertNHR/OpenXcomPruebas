@@ -323,15 +323,34 @@ void ProjectileFlyBState::init()
 			}
 			else
 			{
-				bool foundLoF = _parent->getTileEngine()->canTargetUnit(&originVoxel, targetTile, &_targetVoxel, _unit, isPlayer);
+				if ((Options::battleRealisticAccuracy && !Options::oxceEnableOffCentreShooting)
+					|| !Options::battleRealisticAccuracy)
+				_action.relativeOrigin = BattleActionOrigin::CENTRE; // NHR Is it needed?
 
+				// TEMPORARY SOLUTION !!!
+				// Temporarily, _action.relativeOrigin is set inside Map::drawTerrain()
+				// so canTargetUnit() here starts to look for LoF from already selected origin (left, right or center)
+				// It prevents the bug where checkVoxelExposure selects best direction but canTargetUnit() here uses its own
+				// In that case, shot goes from wrong origin to a voxel, exposed to other origin, and can hit the obstacle
+				// albeit successfull hit is rolled
+
+				// This could be fixed in case checkVoxelExposure will replace canTargetUnit() here. Someday.
+
+				bool foundLoF = false;
+				if(Options::battleRealisticAccuracy)
+					foundLoF = _parent->getTileEngine()->canTargetUnitRACS(&originVoxel, targetTile, &_targetVoxel, _unit, isPlayer);
+				else
+					foundLoF = _parent->getTileEngine()->canTargetUnit(&originVoxel, targetTile, &_targetVoxel, _unit, isPlayer);
 				if (!foundLoF && Options::oxceEnableOffCentreShooting)
 				{
 					// If we can't target from the standard shooting position, try a bit left and right from the centre.
-					for (auto& rel_pos : { BattleActionOrigin::LEFT, BattleActionOrigin::RIGHT })
+					for (auto& rel_pos : { BattleActionOrigin::CENTRE, BattleActionOrigin::LEFT, BattleActionOrigin::RIGHT })
 					{
 						_action.relativeOrigin = rel_pos;
 						originVoxel = _parent->getTileEngine()->getOriginVoxel(_action, _parent->getSave()->getTile(_origin));
+						if(Options::battleRealisticAccuracy)
+							foundLoF = _parent->getTileEngine()->canTargetUnitRACS(&originVoxel, targetTile, &_targetVoxel, _unit, isPlayer);						
+						else
 						foundLoF = _parent->getTileEngine()->canTargetUnit(&originVoxel, targetTile, &_targetVoxel, _unit, isPlayer);
 						if (foundLoF)
 						{
@@ -352,6 +371,10 @@ void ProjectileFlyBState::init()
 					}
 				}
 			}
+		}
+		else if (Options::battleRealisticAccuracy) // RACS
+		{
+			_targetVoxel = _parent->getTileEngine()->adjustTargetVoxelFromTileType(&originVoxel, targetTile, _unit, isPlayer);
 		}
 		else if (targetTile->getMapData(O_OBJECT) != 0)
 		{
@@ -471,7 +494,8 @@ bool ProjectileFlyBState::createNewProjectile()
 	{
 		_projectileImpact = projectile->calculateThrow(BattleUnit::getFiringAccuracy(attack, _parent->getMod()) / accuracyDivider);
 		const RuleItem *ruleItem = _action.weapon->getRules();
-		if (_projectileImpact == V_FLOOR || _projectileImpact == V_UNIT || _projectileImpact == V_OBJECT)
+		//if (_projectileImpact == V_FLOOR || _projectileImpact == V_UNIT || _projectileImpact == V_OBJECT)
+		if (_projectileImpact == V_FLOOR || _projectileImpact == V_UNIT || _projectileImpact == V_OBJECT || (Options::battleRealisticAccuracy && (_projectileImpact == V_WESTWALL || _projectileImpact == V_NORTHWALL || _projectileImpact == V_EMPTY))) // RACS		
 		{
 			if (_unit->getFaction() != FACTION_PLAYER && ruleItem->isGrenadeOrProxy())
 			{

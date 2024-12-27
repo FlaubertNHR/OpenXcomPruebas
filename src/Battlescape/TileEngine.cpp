@@ -879,7 +879,7 @@ void iterateTilesLightMaxBound(SavedBattleGame* save, Position position, int eve
 
 } // namespace
 
-constexpr int TileEngine::heightFromCenter[11];
+constexpr int TileEngine::heightFromCenter[13];
 
 
 constexpr Position TileEngine::invalid;
@@ -1674,11 +1674,11 @@ bool TileEngine::calculateFOV(BattleUnit *unit, bool doTileRecalc, bool doUnitRe
 }
 
 /**
- * Gets the origin voxel of a unit's eyesight
+ * Gets the origin voxel of a unit's eyesight (Realistic Accuracy Cover System)
  * @param currentUnit The watcher.
  * @return Approximately an eyeball voxel.
  */
-Position TileEngine::getSightOriginVoxel(BattleUnit *currentUnit)
+Position TileEngine::getSightOriginVoxel(BattleUnit *currentUnit, Tile *tileTarget, BattleActionOrigin relOrigin)
 {
 	const Position pos = currentUnit->getPosition();
 	auto* tile = currentUnit->getTile();
@@ -1701,6 +1701,49 @@ Position TileEngine::getSightOriginVoxel(BattleUnit *currentUnit)
 		{
 			originVoxel.z--;
 		}
+	}
+
+	if (Options::battleRealisticAccuracy &&
+		Options::oxceEnableOffCentreShooting &&
+		tileTarget)
+	{
+		// Adjuct target tile to the centre of unit
+		Position adjustedPos;
+		BattleUnit *targetUnit = tileTarget->getUnit();
+		if (targetUnit)
+		{
+			int targetSize = targetUnit->getArmor()->getSize();
+			Position targetVoxel = targetUnit->getPosition().toVoxel() + Position(8*targetSize, 8*targetSize, 0);
+			adjustedPos = targetVoxel.toTile();
+		}
+
+		int direction = getDirectionTo(pos, adjustedPos);
+		int unitSize = currentUnit->getArmor()->getSize();
+		originVoxel.x = pos.toVoxel().x;
+		originVoxel.y = pos.toVoxel().y;
+
+		const int dirXshift[8] = {5, 6, 8,10,11,10, 8, 6};
+		const int dirYshift[8] = {8, 6, 5, 6, 8,10,11,10};
+
+		// Offset for different relative origin values
+		switch (relOrigin)
+		{
+		case BattleActionOrigin::CENTRE:
+			originVoxel.x += 8 * unitSize;
+			originVoxel.y += 8 * unitSize;
+			break;
+
+		case BattleActionOrigin::LEFT:
+			originVoxel.x += dirXshift[ direction ] * unitSize;
+			originVoxel.y += dirYshift[ direction ] * unitSize;
+			break;
+
+		case BattleActionOrigin::RIGHT:
+			direction = (direction + 4) % 8;
+			originVoxel.x += dirXshift[ direction ] * unitSize;
+			originVoxel.y += dirYshift[ direction ] * unitSize;
+			break;
+		};
 	}
 
 	return originVoxel;
@@ -1885,7 +1928,23 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	Position originVoxel = getSightOriginVoxel(currentUnit);
 
 	Position scanVoxel;
-	bool unitSeen = canTargetUnit(&originVoxel, tile, &scanVoxel, currentUnit, false);
+	bool unitSeen;
+	
+	if(Options::battleRealisticAccuracy)
+		unitSeen = canTargetUnitRACS(&originVoxel, tile, &scanVoxel, currentUnit, false);
+	else
+		unitSeen = canTargetUnit(&originVoxel, tile, &scanVoxel, currentUnit, false);
+	if (!unitSeen &&
+		Options::battleRealisticAccuracy &&
+		Options::oxceEnableOffCentreShooting)
+	{
+		for (const auto &relPos : { BattleActionOrigin::LEFT, BattleActionOrigin::RIGHT })
+		{
+			originVoxel = getSightOriginVoxel(currentUnit, tile, relPos);
+			unitSeen = canTargetUnitRACS(&originVoxel, tile, &scanVoxel, currentUnit, false);
+			if (unitSeen) break;
+		}
+	}
 
 	// heat vision should be blind by looking directly through fire
 	int fireDensityFactor = Clamp(currentUnit->getHeatVision(), 0, 100);
@@ -2088,14 +2147,14 @@ bool TileEngine::isTileInLOS(BattleAction *action, Tile *tile, bool drawing)
 }
 
 /**
- * Checks for how exposed unit is for another unit.
+ * Checks for how exposed unit is for another unit. Original version.Not used?
  * @param originVoxel Voxel of trace origin (eye or gun's barrel).
  * @param tile The tile to check for.
  * @param excludeUnit Is self (not to hit self).
  * @param excludeAllBut [Optional] is unit which is the only one to be considered for ray hits.
  * @return Degree of exposure (as percent).
  */
-int TileEngine::checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit *excludeUnit, BattleUnit *excludeAllBut)
+/*int TileEngine::checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit *excludeUnit, BattleUnit *excludeAllBut)
 {
 	Position targetVoxel = tile->getPosition().toVoxel() + Position(8, 8, 0);
 	Position scanVoxel;
@@ -2162,6 +2221,192 @@ int TileEngine::checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit
 		}
 	}
 	return (visible*100)/total;
+}
+*/
+/**
+ * Checks for how exposed unit is for another unit (RACS version)
+ * @param originVoxel Voxel of trace origin (eye or gun's barrel).
+ * @param tile The tile to check for.
+ * @param excludeUnit Is self (not to hit self).
+ * @param exposedVoxels [Optional] Array of positions of exposed voxels (function fills it)
+ * @return Degree of exposure (as percent).
+ */
+double TileEngine::checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit *excludeUnit, bool isDebug, std::vector<Position> *exposedVoxels, bool isSimpleMode)
+{
+	isDebug = isDebug && _save->getDebugMode();
+	if (excludeUnit && (excludeUnit->getFaction() != FACTION_PLAYER)) isSimpleMode = true;
+
+	std::vector<Position> _trajectory;
+	Position scanVoxel;
+	BattleUnit *targetUnit = tile->getUnit();
+	if (targetUnit == nullptr) return 0; //no unit in this tile, even if it elevated and appearing in it.
+	if (targetUnit == excludeUnit) return 0; //skip self
+	Position targetVoxel = targetUnit->getPosition().toVoxel();
+
+	int targetMinHeight = targetVoxel.z - tile->getTerrainLevel();
+	int targetFloatHeight = targetUnit->getFloatHeight();
+	targetMinHeight += targetFloatHeight;
+
+	int heightRange;
+	if (!targetUnit->isOut())
+		heightRange = targetUnit->getHeight();
+	else
+		heightRange = 12;
+
+	int targetMaxHeight = targetMinHeight + heightRange;
+
+	int unitRadius = targetUnit->getRadiusVoxels();
+	int targetSize = targetUnit->getArmor()->getSize();
+	targetVoxel += Position(8*targetSize, 8*targetSize, 0); // center of unit
+
+	int unitMin_X = targetVoxel.x - unitRadius - 1;
+	int unitMin_Y = targetVoxel.y - unitRadius - 1;
+	int unitMax_X = targetVoxel.x + unitRadius + 1;
+	int unitMax_Y = targetVoxel.y + unitRadius + 1;
+
+	// sliceTargets[ unitRadius ] = {0, 0} and won't be overwritten further
+	int sliceTargetsX[ BattleUnit::BIG_MAX_RADIUS*2 + 1 ] = { 0 };
+	int sliceTargetsY[ BattleUnit::BIG_MAX_RADIUS*2 + 1 ] = { 0 };
+
+	// vector manipulation to make scan work in view-space
+	Position relPos = targetVoxel - *originVoxel;
+
+	for ( int testRadius = unitRadius; testRadius > 0; --testRadius) // slice for every voxel of a radius!
+	{
+		double normal = testRadius/sqrt((double)(relPos.x*relPos.x + relPos.y*relPos.y));
+		int relX = (int)floor(((double)relPos.y)*normal+0.5);
+		int relY = (int)floor(((double)-relPos.x)*normal+0.5);
+
+		sliceTargetsX[ unitRadius - testRadius ] = relX;
+		sliceTargetsY[ unitRadius - testRadius ] = relY;
+		sliceTargetsX[ unitRadius + testRadius ] = -relX;
+		sliceTargetsY[ unitRadius + testRadius ] = -relY;
+	}
+
+	int relX = sliceTargetsX[0];
+	int relY = sliceTargetsY[0];
+	int sliceTargetsTopBottom[] = { relY, -relX, -relY, relX }; // front/back scan points
+
+	std::vector<std::string> scanArray;
+	scanArray.reserve(24);
+	const char symbols[] = {'.','_','/','\\','o','u','x'};
+
+	// scan rays from top to bottom, every voxel of target cylinder
+	int total=0;
+	int visible=0;
+
+	// for examlpe hovertank/plasma has floating height of 6, so its bottom is on level 7, with voxels 0-6 below it.
+	int bottomHeight = targetMinHeight + 1;
+
+	int floorElevation = targetMinHeight % Position::TileZ;
+	if (floorElevation < 2)
+	{
+		bottomHeight = targetMinHeight - floorElevation + 2; // can't check height 0-1 (bug?)
+	}
+
+	// Reduce number of checks in simple mode
+	int simplifyDivider = unitRadius;
+	if (targetSize == 2) simplifyDivider = 4;
+
+	for (int height = targetMaxHeight; height >= bottomHeight; height -= 2)
+	{
+		std::string scanLine;
+		scanVoxel.z = height;
+
+		for (int j = 0; j <= unitRadius*2; ++j)
+		{
+			// Skip voxels in "simple" mode. usually to speed up AI calculations
+			if (isSimpleMode && (height + j) % simplifyDivider != 0)
+			{
+				scanLine += '.';
+				continue; // scan every N-th voxel
+			}
+
+			++total;
+			scanVoxel.x = targetVoxel.x + sliceTargetsX[j];
+			scanVoxel.y = targetVoxel.y + sliceTargetsY[j];
+
+			_trajectory.clear();
+			int test = calculateLineVoxel(*originVoxel, scanVoxel, false, &_trajectory, excludeUnit);
+			if (test == V_UNIT)
+			{
+				int impactX = _trajectory.at(0).x;
+				int impactY = _trajectory.at(0).y;
+				int impactZ = _trajectory.at(0).z;
+
+				if (impactX >= unitMin_X && impactX <= unitMax_X &&
+					impactY >= unitMin_Y && impactY <= unitMax_Y &&
+					impactZ >= targetMinHeight+1 && impactZ <= targetMaxHeight)
+				{
+					++visible;
+					if (exposedVoxels) exposedVoxels->emplace_back(scanVoxel);
+					scanLine += '#';
+				}
+				else
+					scanLine += symbols[ test+1 ]; // overlapped by another unit
+			}
+
+			else
+			{
+				if ( test == V_EMPTY )	--total;
+				scanLine += symbols[ test+1 ]; // V_EMPTY = -1
+			}
+		}
+		scanLine += " " + std::to_string( height % Position::TileZ );
+		scanArray.emplace_back( scanLine );
+
+		// Additional bottom layer for units with odd height
+		if (targetFloatHeight > 1 && heightRange % 2 == 0 && height - bottomHeight == 1) ++height;
+	}
+	double exposure = (double)visible / total;
+
+	if (isDebug)
+	{
+		Log(LOG_INFO) << " ";
+		for ( const auto &line : scanArray )
+			Log(LOG_INFO) << line;
+		Log(LOG_INFO) << " ";
+	}
+
+	if (exposure < 0.1) // Check near/far parts of target cylinder
+	{
+		bool aimFromAbove = originVoxel->z > targetMaxHeight;
+		bool aimFromBelow = originVoxel->z < targetMinHeight + 1;
+		if (!aimFromAbove && !aimFromBelow) return exposure; // Aiming horizontally, cannot see any additional voxels
+
+		// sliceTargetsTopBottom[] points order: front, back
+		// If aiming from above: check "top back" and "bottom front" points
+		int heights[] = { targetMinHeight+1, targetMaxHeight };
+
+		// If aiming from below: check "bottom back" and "top front" points
+		if (aimFromBelow) std::swap( heights[0], heights[1] );
+
+		for ( int i = 0; i < 2; ++i)
+		{
+			scanVoxel.z = heights[ i ];
+			scanVoxel.x = targetVoxel.x + sliceTargetsTopBottom[ i * 2 ];
+			scanVoxel.y = targetVoxel.y + sliceTargetsTopBottom[ i * 2 + 1];
+
+			_trajectory.clear();
+			int test = calculateLineVoxel(*originVoxel, scanVoxel, false, &_trajectory, excludeUnit);
+			if (test == V_UNIT)
+			{
+				int impactX = _trajectory.at(0).x;
+				int impactY = _trajectory.at(0).y;
+				int impactZ = _trajectory.at(0).z;
+
+				if (impactX >= unitMin_X && impactX <= unitMax_X &&
+					impactY >= unitMin_Y && impactY <= unitMax_Y &&
+					impactZ >= targetMinHeight+1 && impactZ <= targetMaxHeight)
+				{
+					exposure += 0.05;
+					if (exposedVoxels) exposedVoxels->emplace_back(scanVoxel);
+				}
+			}
+		}
+	}
+
+	return exposure;
 }
 
 /**
@@ -2266,6 +2511,253 @@ bool TileEngine::canTargetUnit(Position *originVoxel, Tile *tile, Position *scan
 		}
 	}
 	return false;
+}
+
+
+/**
+ * Checks for another unit available for targeting and what particular voxel.
+ * @param originVoxel Voxel of trace origin (eye or gun's barrel).
+ * @param tile The tile to check for.
+ * @param scanVoxel is returned coordinate of hit.
+ * @param excludeUnit is self (not to hit self).
+ * @param rememberObstacles Remember obstacles for no LOF indicator?
+ * @param potentialUnit is a hypothetical unit to draw a virtual line of fire for AI. if left blank, this function behaves normally.
+ * @return True if the unit can be targetted.
+ */
+bool TileEngine::canTargetUnitRACS(Position *originVoxel, Tile *tile, Position *scanVoxel, BattleUnit *excludeUnit, bool rememberObstacles, BattleUnit *potentialUnit)
+{
+	std::vector<Position> _trajectory;
+
+	BattleUnit *targetUnit;
+	bool hypothetical = potentialUnit != 0;
+	if (potentialUnit == 0)
+	{
+		targetUnit = tile->getUnit();
+		if (targetUnit == 0) return false; //no unit in this tile, even if it elevated and appearing in it.
+	}
+	else
+		targetUnit = potentialUnit;
+
+	if (targetUnit == excludeUnit) return false; //skip self
+
+	Position tempScanVoxel;
+	if (scanVoxel == nullptr) scanVoxel = &tempScanVoxel; // stub in case we don't plan to return found point
+
+	bool isPlayer = true;
+	bool isUnderAIcontrol = false;
+
+	if (excludeUnit)
+	{
+		if (excludeUnit->getFaction() != FACTION_PLAYER ) isPlayer = false;
+		if (excludeUnit->getFaction() != FACTION_PLAYER) isUnderAIcontrol = true;
+	}
+
+	Position targetVoxel = targetUnit->getPosition().toVoxel();
+
+	int targetMinHeight = targetVoxel.z - tile->getTerrainLevel();
+	int targetFloatHeight = targetUnit->getFloatHeight();
+	targetMinHeight += targetFloatHeight;
+
+	int heightRange;
+	if (!targetUnit->isOut())
+		heightRange = targetUnit->getHeight();
+	else
+		heightRange = 12;
+
+	int targetMaxHeight = targetMinHeight + heightRange;
+
+	int unitRadius = targetUnit->getRadiusVoxels();
+	int targetSize = targetUnit->getArmor()->getSize();
+
+	targetVoxel += Position(8*targetSize, 8*targetSize, 0); // center of unit
+
+	int unitMin_X = targetVoxel.x - unitRadius - 1;
+	int unitMin_Y = targetVoxel.y - unitRadius - 1;
+	int unitMax_X = targetVoxel.x + unitRadius + 1;
+	int unitMax_Y = targetVoxel.y + unitRadius + 1;
+
+	if (isPlayer && !isUnderAIcontrol) // Precise targeting for human player
+	{
+		static int verticalSlices[26] = { 0 }; // Up to 11 frontal section points and 2 for front/back
+		bool aimFromAbove = (originVoxel->z > targetMaxHeight ? true : false);
+		bool aimFromBelow = (originVoxel->z < targetMinHeight ? true : false);
+
+		int shiftCount = 1; // indexes 0, 1 for (0,0)
+		Position relPos = targetVoxel - *originVoxel;
+
+		if (targetSize == 1)
+		{
+			// Add (radius-1) and (radius) slices
+			for ( int testRadius = unitRadius-1; testRadius <= unitRadius; ++testRadius)
+			{
+				float normal = testRadius / sqrt((float)(relPos.x*relPos.x + relPos.y*relPos.y));
+				int relX = floor(((float)relPos.y)*normal+0.5);
+				int relY = floor(((float)-relPos.x)*normal+0.5);
+
+				verticalSlices[ ++shiftCount ] = relX; // starting from index 2
+				verticalSlices[ ++shiftCount ] = relY;
+				verticalSlices[ ++shiftCount ] = -relX;
+				verticalSlices[ ++shiftCount ] = -relY;
+
+				if (testRadius == unitRadius && (aimFromAbove || aimFromBelow))
+				{
+					verticalSlices[ ++shiftCount ] = relY;
+					verticalSlices[ ++shiftCount ] = -relX;
+					verticalSlices[ ++shiftCount ] = -relY;
+					verticalSlices[ ++shiftCount ] = relX;
+				}
+			}
+		}
+		else // size = 2
+		{
+			for ( int testRadius = 3; testRadius <= 15; testRadius += 3 )
+			{
+				float normal = testRadius / sqrt((float)(relPos.x*relPos.x + relPos.y*relPos.y));
+				int relX = floor(((float)relPos.y)*normal+0.5);
+				int relY = floor(((float)-relPos.x)*normal+0.5);
+
+				verticalSlices[ ++shiftCount ] = relX;
+				verticalSlices[ ++shiftCount ] = relY;
+				verticalSlices[ ++shiftCount ] = -relX;
+				verticalSlices[ ++shiftCount ] = -relY;
+
+				if (testRadius == 15 && (aimFromAbove || aimFromBelow))
+				{
+					verticalSlices[ ++shiftCount ] = relY;
+					verticalSlices[ ++shiftCount ] = -relX;
+					verticalSlices[ ++shiftCount ] = -relY;
+					verticalSlices[ ++shiftCount ] = relX;
+				}
+			}
+		}
+
+		int pointsCount = (shiftCount + 1) / 2;
+
+		int targetCenterHeight;
+		targetCenterHeight = (targetMaxHeight + targetMinHeight) / 2;
+		targetCenterHeight += (targetMaxHeight - targetCenterHeight) % 2; // Center should have even number of voxels above it
+
+		int  horizontalCount = heightRange / 2; // Number of horizontal slices for a target
+		horizontalCount += horizontalCount % 2; // They are symmetrical relative to center so should be even number too
+
+		if (horizontalCount > 12) horizontalCount = 12;
+		if (horizontalCount <= 0) horizontalCount = 0;
+
+		// Scan ray for every horizontal slice including center
+		for (int hIdx = 0; hIdx <= horizontalCount; ++hIdx)
+		{
+			// Start from the center, gradually increase vertical distance in both directions
+			scanVoxel->z = targetCenterHeight + heightFromCenter[ hIdx ];
+
+			if (scanVoxel->z < targetMinHeight+1 || scanVoxel->z > targetMaxHeight)
+				continue;
+
+			// Scan ray for every vertical slice in selected horizontal plane
+			for (int vIdx = 0; vIdx < pointsCount; ++vIdx)
+			{
+				// Skip unnecessary checks
+				bool checkTopBottom = (aimFromAbove || aimFromBelow) && vIdx >= pointsCount - 2;
+				if (checkTopBottom && scanVoxel->z > targetMinHeight+2 && scanVoxel->z < targetMaxHeight ) continue;
+
+				// Start from the center, increase horizontal distance in both directions
+				scanVoxel->x = targetVoxel.x + verticalSlices[ vIdx * 2 ];
+				scanVoxel->y = targetVoxel.y + verticalSlices[ vIdx * 2 + 1 ];
+
+				_trajectory.clear();
+				int test = calculateLineVoxel(*originVoxel, *scanVoxel, false, &_trajectory, excludeUnit);
+				if (test == V_UNIT)
+				{
+					if (_trajectory.empty()) assert(false);
+
+					int impactX = _trajectory.at(0).x;
+					int impactY = _trajectory.at(0).y;
+					int impactZ = _trajectory.at(0).z;
+
+					//voxel of hit must be inside of scanned box
+					if (impactX >= unitMin_X && impactX <= unitMax_X &&
+						impactY >= unitMin_Y && impactY <= unitMax_Y &&
+						impactZ >= targetMinHeight+1 && impactZ <= targetMaxHeight)
+					{
+						return true;
+					}
+				}
+
+				else if (test == V_EMPTY && hypothetical && !_trajectory.empty())
+				{
+					return true;
+				}
+
+				if (rememberObstacles && _trajectory.size()>0)
+				{
+					Tile *tileObstacle = _save->getTile(_trajectory.at(0).toTile());
+					if (tileObstacle) tileObstacle->setObstacle(test);
+				}
+			}
+		}
+		return false;
+	}
+
+	else // simplified targeting for AI
+	{
+		// vector manipulation to make scan work in view-space
+		Position relPos = targetVoxel - *originVoxel;
+
+		float normal = unitRadius/sqrt((float)(relPos.x*relPos.x + relPos.y*relPos.y));
+		int relX = floor(((float)relPos.y)*normal+0.5);
+		int relY = floor(((float)-relPos.x)*normal+0.5);
+
+		// Targeting order: center, right, left, front, back
+		int verticalSlices[] = { 0,0, relX,relY, -relX,-relY, relY,-relX, -relY,relX };
+
+		int horizontalSlices[] = // Targeting order: 3/4 height, 1/4 height, top, bottom
+			{
+				targetMinHeight + heightRange * 3 / 4,
+				targetMinHeight + 1 + (int)ceil(heightRange * 0.25f),
+				targetMaxHeight,
+				targetMinHeight + 1
+			};
+
+		// Scan for every horizontal slice
+		for (int hIdx = 0; hIdx < 4; ++hIdx)
+		{
+			scanVoxel->z = horizontalSlices[ hIdx ];
+
+			// Scan ray for every vertical slice in selected horizontal plane
+			for (int vIdx = 0; vIdx < 5; ++vIdx)
+			{
+				// Scan front/back slices only on top/bottom planes
+				if (hIdx < 2 && vIdx > 2) break;
+
+				scanVoxel->x = targetVoxel.x + verticalSlices[ vIdx * 2 ];
+				scanVoxel->y = targetVoxel.y + verticalSlices[ vIdx * 2 + 1];
+
+				_trajectory.clear();
+				int test = calculateLineVoxel(*originVoxel, *scanVoxel, false, &_trajectory, excludeUnit);
+				if (test == V_UNIT)
+				{
+					if (_trajectory.empty()) assert(false);
+
+					int impactX = _trajectory.at(0).x;
+					int impactY = _trajectory.at(0).y;
+					int impactZ = _trajectory.at(0).z;
+
+					//voxel of hit must be inside of scanned box
+					if (impactX >= unitMin_X && impactX <= unitMax_X &&
+						impactY >= unitMin_Y && impactY <= unitMax_Y &&
+						impactZ >= targetMinHeight+1 && impactZ <= targetMaxHeight)
+					{
+						return true;
+					}
+				}
+
+				else if (test == V_EMPTY && hypothetical && !_trajectory.empty())
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }
 
 /**
@@ -2441,6 +2933,51 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 	return false;
 }
 
+Position TileEngine::adjustTargetVoxelFromTileType(Position *originVoxel, Tile *targetTile, BattleUnit *excludeUnit, bool rememberObstacles)
+{
+	if (targetTile == nullptr || targetTile->getPosition() == TileEngine::invalid) return TileEngine::invalid;
+	Position targetVoxel;
+
+	if (targetTile->getMapData(O_OBJECT) != 0)
+	{
+		if (!canTargetTile(originVoxel, targetTile, O_OBJECT, &targetVoxel, excludeUnit, rememberObstacles))
+		{
+			targetVoxel = targetTile->getPosition().toVoxel() + Position(8, 8, 10);
+		}
+	}
+	else if (targetTile->getMapData(O_NORTHWALL) != 0)
+	{
+		if (!canTargetTile(originVoxel, targetTile, O_NORTHWALL, &targetVoxel, excludeUnit, rememberObstacles))
+		{
+			targetVoxel = targetTile->getPosition().toVoxel() + Position(8, 0, 9);
+		}
+	}
+	else if (targetTile->getMapData(O_WESTWALL) != 0)
+	{
+		if (!canTargetTile(originVoxel, targetTile, O_WESTWALL, &targetVoxel, excludeUnit, rememberObstacles))
+		{
+			targetVoxel = targetTile->getPosition().toVoxel() + Position(0, 8, 9);
+		}
+	}
+	else if (targetTile->getMapData(O_FLOOR) != 0)
+	{
+		if (!canTargetTile(originVoxel, targetTile, O_FLOOR, &targetVoxel, excludeUnit, rememberObstacles))
+		{
+			targetVoxel = targetTile->getPosition().toVoxel() + Position(8, 8, 2);
+		}
+	}
+	else
+	{
+		// dummy attempt (only to highlight obstacles)
+		canTargetTile(originVoxel, targetTile, MapData::O_DUMMY, &targetVoxel, excludeUnit, rememberObstacles);
+
+		// target nothing, targets the middle of the tile
+		targetVoxel = targetTile->getPosition().toVoxel() + TileEngine::voxelTileCenter;
+	}
+
+	return targetVoxel;
+}
+
 /**
  * Calculates line of sight of a soldiers within range of the Position
  * (used when terrain has changed, which can reveal new parts of terrain or units).
@@ -2596,11 +3133,12 @@ std::vector<TileEngine::ReactionScore> TileEngine::getSpottingUnits(BattleUnit* 
 					// to allow melee reactions when attacked from any side, not just from the front
 					gotHit = bu->wasMeleeAttackedBy(unit->getId());
 				}
-
+				bool canActuallyTargetUnit = (Options::battleRealisticAccuracy && canTargetUnitRACS(&originVoxel, tile, &targetVoxel, bu, false)) 
+                                    || (!Options::battleRealisticAccuracy && canTargetUnit(&originVoxel, tile, &targetVoxel, bu, false));
 					// can actually see the target Tile, or we got hit
 				if ((bu->checkViewSector(unit->getPosition()) || gotHit) &&
 					// can actually target the unit
-					canTargetUnit(&originVoxel, tile, &targetVoxel, bu, false) &&
+					canActuallyTargetUnit &&
 					// can actually see the unit
 					visible(bu, tile))
 				{
@@ -5367,7 +5905,8 @@ bool TileEngine::validMeleeRange(Position pos, int direction, BattleUnit *attack
 						Position originVoxel = Position(origin->getPosition().toVoxel())
 							+ Position(8,8,attacker->getHeight() + attacker->getFloatHeight() - 4 -origin->getTerrainLevel());
 						Position targetVoxel;
-						if (canTargetUnit(&originVoxel, targetTile, &targetVoxel, attacker, false))
+						if ((Options::battleRealisticAccuracy && canTargetUnitRACS(&originVoxel, targetTile, &targetVoxel, attacker, false))
+						|| (!Options::battleRealisticAccuracy && canTargetUnit(&originVoxel, targetTile, &targetVoxel, attacker, false)))
 						{
 							if (dest)
 							{
@@ -5648,6 +6187,8 @@ int TileEngine::faceWindow(Position position)
  */
 bool TileEngine::validateThrow(BattleAction &action, Position originVoxel, Position targetVoxel, int depth, double *curve, int *voxelType, bool forced)
 {
+	if (originVoxel == targetVoxel)
+		return false;
 	bool foundCurve = false;
 	double curvature = 0.5;
 	if (action.type == BA_THROW)
@@ -5810,8 +6351,15 @@ int TileEngine::getArcDirection(int directionA, int directionB) const
  */
 Position TileEngine::getOriginVoxel(BattleAction &action, Tile *tile)
 {
-	const int dirYshift[8] = {1, 1, 8, 15,15,15,8, 1};
-	const int dirXshift[8] = {8, 14,15,15,8, 1, 1, 1};
+	int unitSize = action.actor->getArmor()->getSize();
+	int weaponShift = 4; // Original weapon position shift from the top of units head
+	bool isArcingTrajectory = action.type == BA_THROW;
+	if (action.weapon && action.weapon->getArcingShot(action.type)) 
+		isArcingTrajectory = true;
+	// If small unit goes either precise aiming or kneeling
+	if (Options::battleRealisticAccuracy && unitSize == 1 && (action.type == BA_AIMEDSHOT || action.actor->isKneeled()))
+		weaponShift = 1; // ...move weapon to the eyes level
+
 	if (!tile)
 	{
 		tile = action.actor->getTile();
@@ -5835,7 +6383,7 @@ Position TileEngine::getOriginVoxel(BattleAction &action, Tile *tile)
 		}
 		else
 		{
-			originVoxel.z -= 4;
+			originVoxel.z -= weaponShift;
 		}
 
 		if (originVoxel.z >= (origin.z + 1)*24)
@@ -5850,9 +6398,55 @@ Position TileEngine::getOriginVoxel(BattleAction &action, Tile *tile)
 				{
 					originVoxel.z--;
 				}
-				originVoxel.z -= 4;
+				originVoxel.z -= weaponShift;
 			}
 		}
+
+		if (Options::battleRealisticAccuracy && !isArcingTrajectory)
+		{
+			const int dirXshift[8] = {5, 6, 8,10,11,10, 8, 6};
+			const int dirYshift[8] = {8, 6, 5, 6, 8,10,11,10};
+
+			// Adjuct target tile to the centre of unit
+			Tile *t = _save->getTile( action.target );
+			if (t)
+			{
+				BattleUnit *targetUnit = t->getUnit();
+				if (targetUnit)
+				{
+					int targetSize = targetUnit->getArmor()->getSize();
+					Position targetVoxel = targetUnit->getPosition().toVoxel() + Position(8*targetSize, 8*targetSize, 0);
+					action.target = targetVoxel.toTile();
+				}
+			}
+
+			int direction = getDirectionTo(origin, action.target);
+
+			// Offset for different relativeOrigin values
+			switch (action.relativeOrigin)
+			{
+			case BattleActionOrigin::CENTRE:
+				originVoxel.x += 8 * unitSize; // Shoot straight from the eye point
+				originVoxel.y += 8 * unitSize; // moving barrel in front of unit breaks LOF near walls with existing LOS above them
+				break;
+
+			case BattleActionOrigin::LEFT:
+				originVoxel.x += dirXshift[ direction ] * unitSize;
+				originVoxel.y += dirYshift[ direction ] * unitSize;
+				break;
+
+			case BattleActionOrigin::RIGHT:
+				direction = (direction + 4) % 8;
+				originVoxel.x += dirXshift[ direction ] * unitSize;
+				originVoxel.y += dirYshift[ direction ] * unitSize;
+				break;
+			};
+		}
+		else
+		{
+			const int dirXshift[8] = {8, 14,15,15,8, 1, 1, 1};
+			const int dirYshift[8] = {1, 1, 8, 15,15,15,8, 1};
+
 		int direction = getDirectionTo(origin, action.target);
 
 		// Offset for different relativeOrigin values
@@ -5860,20 +6454,21 @@ Position TileEngine::getOriginVoxel(BattleAction &action, Tile *tile)
 		{
 		case BattleActionOrigin::CENTRE:
 			// Standard offset.
-			originVoxel.x += dirXshift[direction] * action.actor->getArmor()->getSize();
-			originVoxel.y += dirYshift[direction] * action.actor->getArmor()->getSize();
+				originVoxel.x += dirXshift[ direction ] * unitSize;
+				originVoxel.y += dirYshift[ direction ] * unitSize;
 			break;
 
 			// 2:1 Weighted average of the standard offset and a rotation, either left or right.
 		case BattleActionOrigin::LEFT:
-			originVoxel.x += ((2 * dirXshift[direction] + dirXshift[(direction + 7) % 8]) * action.actor->getArmor()->getSize() + 1) / 3;
-			originVoxel.y += ((2 * dirYshift[direction] + dirYshift[(direction + 7) % 8]) * action.actor->getArmor()->getSize() + 1) / 3;
+				originVoxel.x += ((2 * dirXshift[ direction ] + dirXshift[(direction + 7) % 8]) * unitSize + 1) / 3;
+				originVoxel.y += ((2 * dirYshift[ direction ] + dirYshift[(direction + 7) % 8]) * unitSize + 1) / 3;
 			break;
 
 		case BattleActionOrigin::RIGHT:
-			originVoxel.x += ((2 * dirXshift[direction] + dirXshift[(direction + 1) % 8]) * action.actor->getArmor()->getSize() + 1) / 3;
-			originVoxel.y += ((2 * dirYshift[direction] + dirYshift[(direction + 1) % 8]) * action.actor->getArmor()->getSize() + 1) / 3;
+				originVoxel.x += ((2 * dirXshift[ direction ] + dirXshift[(direction + 1) % 8]) * unitSize + 1) / 3;
+				originVoxel.y += ((2 * dirYshift[ direction ] + dirYshift[(direction + 1) % 8]) * unitSize + 1) / 3;
 			break;
+			};
 		};
 	}
 	else
@@ -5922,7 +6517,10 @@ void TileEngine::setDangerZone(Position pos, int radius, BattleUnit *unit)
 						// granted this won't properly account for explosions tearing through walls, but then we can't really
 						// know that kind of information before the fact, so let's have the AI assume that the wall (or tree)
 						// is enough to protect them.
-						if (calculateLineVoxel(originVoxel, targetVoxel, false, &trajectory, unit, unit) == V_EMPTY)
+						bool storeTrajectory = false; // RACS put it true (¿?)
+						if(Options::battleRealisticAccuracy)
+							storeTrajectory = true;
+						if (calculateLineVoxel(originVoxel, targetVoxel, storeTrajectory, &trajectory, unit, unit) == V_EMPTY)
 						{
 							if (trajectory.size() && (trajectory.back().toTile()) == pos + Position(x,y,0))
 							{

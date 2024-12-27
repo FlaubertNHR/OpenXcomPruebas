@@ -30,6 +30,26 @@ class Surface;
 class Tile;
 class Mod;
 
+struct AccuracyModConfig // Real Accuracy mod configuration
+{
+	int MinCap;
+	int MaxCap;
+	int AimBonus;
+	int KneelBonus;
+	int aimedDivider;
+	int snapDivider;
+	int autoDivider;
+	int twoHandsBonus;
+	int distanceDivider;
+	double SizeMultiplier;
+	int suicideProtectionDistance;
+	int bonusDistanceMax;
+	int bonusDistanceMin;
+	int coverEfficiency[5];
+};
+
+extern AccuracyModConfig AccuracyMod;
+
 /**
  * A class that represents a projectile. Map is the owner of an instance of this class during its short life.
  * It calculates its own trajectory and then moves along this pre-calculated trajectory in voxel space.
@@ -60,6 +80,7 @@ private:
 	bool _reversed;
 	int _vaporColor, _vaporDensity, _vaporProbability;
 	void applyAccuracy(Position origin, Position *target, double accuracy, bool keepRange, bool extendLine);
+	void applyAccuracyRACS(Position origin, Position *target, double accuracy, bool keepRange, bool extendLine);
 public:
 	/// Creates a new Projectile.
 	Projectile(Mod *mod, SavedBattleGame *save, BattleAction action, Position origin, Position target, BattleItem *ammo);

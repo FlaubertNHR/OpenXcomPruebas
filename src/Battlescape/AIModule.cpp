@@ -731,7 +731,10 @@ void AIModule::setupAmbush()
 
 			// make sure we can't be seen here.
 			Position target;
-			if (!_save->getTileEngine()->canTargetUnit(&origin, tile, &target, _aggroTarget, false, _unit) && !getSpottingUnits(pos))
+
+			if(((Options::battleRealisticAccuracy && !_save->getTileEngine()->canTargetUnitRACS(&origin, tile, &target, _aggroTarget, false, _unit)) 
+			||(!Options::battleRealisticAccuracy && !_save->getTileEngine()->canTargetUnit(&origin, tile, &target, _aggroTarget, false, _unit))) 
+				&& !getSpottingUnits(pos))
 			{
 				_save->getPathfinding()->calculate(_unit, pos, BAM_NORMAL);
 				int ambushTUs = _save->getPathfinding()->getTotalTUCost();
@@ -785,7 +788,8 @@ void AIModule::setupAmbush()
 				Tile *tile = _save->getTile(currentPos);
 				Position target;
 				// do a virtual fire calculation
-				if (_save->getTileEngine()->canTargetUnit(&origin, tile, &target, _unit, false, _aggroTarget))
+				if(((Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnitRACS(&origin, tile, &target, _unit, false, _aggroTarget)) 
+				 ||(!Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnit(&origin, tile, &target, _unit, false, _aggroTarget))))
 				{
 					// if we can virtually fire at the hypothetical target, we know which way to face.
 					_ambushAction.finalFacing = _save->getTileEngine()->getDirectionTo(_ambushAction.target, currentPos);
@@ -1143,14 +1147,16 @@ int AIModule::getSpottingUnits(const Position& pos) const
 			Position targetVoxel;
 			if (checking)
 			{
-				if (_save->getTileEngine()->canTargetUnit(&originVoxel, _save->getTile(pos), &targetVoxel, bu, false, _unit))
+				if(((Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnitRACS(&originVoxel, _save->getTile(pos), &targetVoxel, bu, false, _unit)) 
+				 ||(!Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnit(&originVoxel, _save->getTile(pos), &targetVoxel, bu, false, _unit))))
 				{
 					tally++;
 				}
 			}
 			else
 			{
-				if (_save->getTileEngine()->canTargetUnit(&originVoxel, _save->getTile(pos), &targetVoxel, bu, false))
+				if(((Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnitRACS(&originVoxel, _save->getTile(pos), &targetVoxel, bu, false)) 
+				 ||(!Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnit(&originVoxel, _save->getTile(pos), &targetVoxel, bu, false))))
 				{
 					tally++;
 				}
@@ -1188,7 +1194,8 @@ int AIModule::selectNearestTarget()
 					action.weapon = _attackAction.weapon;
 					action.target = bu->getPosition();
 					Position origin = _save->getTileEngine()->getOriginVoxel(action, 0);
-					valid = _save->getTileEngine()->canTargetUnit(&origin, bu->getTile(), &target, _unit, false);
+					valid = (Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnitRACS(&origin, bu->getTile(), &target, _unit, false))
+							||(!Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnit(&origin, bu->getTile(), &target, _unit, false));
 				}
 				else
 				{
@@ -1571,7 +1578,8 @@ int AIModule::scoreFiringMode(BattleAction *action, BattleUnit *target, bool che
 		}
 		else
 		{
-			if (!_save->getTileEngine()->canTargetUnit(&origin, target->getTile(), &targetPosition, _unit, false, target))
+			if(((Options::battleRealisticAccuracy && !_save->getTileEngine()->canTargetUnitRACS(&origin, target->getTile(), &targetPosition, _unit, false, target)) 
+			  ||(!Options::battleRealisticAccuracy && !_save->getTileEngine()->canTargetUnit(&origin, target->getTile(), &targetPosition, _unit, false, target))))
 			{
 				return 0;
 			}
@@ -1861,7 +1869,8 @@ bool AIModule::findFirePoint()
 			// 4 because -2 is eyes and 2 below that is the rifle (or at least that's my understanding)
 			Position(8,8, _unit->getHeight() + _unit->getFloatHeight() - tile->getTerrainLevel() - 4);
 
-		if (_save->getTileEngine()->canTargetUnit(&origin, _aggroTarget->getTile(), &target, _unit, false))
+		if(((Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnitRACS(&origin, _aggroTarget->getTile(), &target, _unit, false)) 
+		 ||(!Options::battleRealisticAccuracy && _save->getTileEngine()->canTargetUnit(&origin, _aggroTarget->getTile(), &target, _unit, false))))
 		{
 			_save->getPathfinding()->calculate(_unit, pos, BAM_NORMAL);
 			// can move here
