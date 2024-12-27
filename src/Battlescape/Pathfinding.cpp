@@ -38,7 +38,10 @@ constexpr int Pathfinding::dir_z[Pathfinding::dir_max];
 
 int Pathfinding::red = 3;
 int Pathfinding::yellow = 10;
+int Pathfinding::brown = 11;
 int Pathfinding::green = 4;
+int Pathfinding::white = 6;
+
 
 /**
  * Sets up a Pathfinding.

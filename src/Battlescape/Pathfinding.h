@@ -196,6 +196,9 @@ public:
 	static int red;
 	static int green;
 	static int yellow;
+	static int brown;
+	static int white;
+
 
 	/// Creates a new Pathfinding class.
 	Pathfinding(SavedBattleGame *save);

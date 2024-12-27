@@ -113,7 +113,7 @@ private:
 	std::vector<Uint32> _lightPropagationTempNeedUpdate;
 
 	const RuleInventory *_inventorySlotGround;
-	constexpr static int heightFromCenter[11] = {0,-2,+2,-4,+4,-6,+6,-8,+8,-12,+12};
+	constexpr static int heightFromCenter[13] = {0,-2,+2,-4,+4,-6,+6,-8,+8,-10,+10,-12,+12};
 	bool _personalLighting;
 	Tile *_cacheTile;
 	Tile *_cacheTileBelow;
@@ -209,8 +209,8 @@ public:
 	VoxelType calculateLineVoxel(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, BattleUnit *excludeAllBut = 0, bool onlyVisible = false);
 	/// Calculates a parabola trajectory.
 	int calculateParabolaVoxel(Position origin, Position target, bool storeTrajectory, std::vector<Position> *trajectory, BattleUnit *excludeUnit, double curvature, const Position delta);
-	/// Gets the origin voxel of a unit's eyesight.
-	Position getSightOriginVoxel(BattleUnit *currentUnit);
+	/// Gets the origin voxel of a unit's eyesight (RCAS version)
+	Position getSightOriginVoxel(BattleUnit *currentUnit, Tile *tileTarget = nullptr, BattleActionOrigin relOrigin = BattleActionOrigin::CENTRE);
 	/// Checks visibility of a unit on this tile.
 	bool visible(BattleUnit *currentUnit, Tile *tile);
 	/// Checks visibility of a tile.
@@ -263,12 +263,18 @@ public:
 	bool validTerrainMeleeRange(BattleAction* action);
 	/// Gets the AI to look through a window.
 	int faceWindow(Position position);
-	/// Checks a unit's % exposure on a tile.
-	int checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit *excludeUnit, BattleUnit *excludeAllBut);
+	/// Checks a unit's % exposure on a tile. Original version. Not used?
+	//int checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit *excludeUnit, BattleUnit *excludeAllBut);
+	/// Checks a unit's % exposure on a tile, and fills array of exposed voxels (RCAS version)
+	double checkVoxelExposure(Position *originVoxel, Tile *tile, BattleUnit *excludeUnit, bool isDebug = false, std::vector<Position> *exposedVoxels = nullptr, bool isSimpleMode = true);		
+	/// Checks validity for targetting a unit (Realistic Accuracy Cover System)
+	bool canTargetUnitRACS(Position *originVoxel, Tile *tile, Position *scanVoxel, BattleUnit *excludeUnit, bool rememberObstacles, BattleUnit *potentialUnit = 0);
 	/// Checks validity for targetting a unit.
 	bool canTargetUnit(Position *originVoxel, Tile *tile, Position *scanVoxel, BattleUnit *excludeUnit, bool rememberObstacles, BattleUnit *potentialUnit = 0);
 	/// Check validity for targetting a tile.
 	bool canTargetTile(Position *originVoxel, Tile *tile, int part, Position *scanVoxel, BattleUnit *excludeUnit, bool rememberObstacles);
+	/// Adjust target position inside tile based on its type and visibility
+	Position adjustTargetVoxelFromTileType(Position *originVoxel, Tile *targetTile, BattleUnit *excludeUnit, bool rememberObstacles);
 	/// Calculates the z voxel for shadows.
 	int castedShade(Position voxel);
 	/// Checks the visibility of a given voxel.
