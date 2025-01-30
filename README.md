@@ -12,6 +12,33 @@ and the [wiki](https://www.ufopaedia.org/index.php/OpenXcom).
 
 Uses modified code from SDL\_gfx (LGPL) with permission from author.
 
+## Battlescape Editor
+ Map Editor for Open X-Com Extended (OXCE) is intended for demonstration and testing of the basic functionality of an in-game map editor. Feedback on the user interface and functionality are appreciated as are bug reports, but bug fixing support will likely be slow and tied to new feature releases. Please read through the following list of included and planned features before making suggestions for further development. It is also not intended to replace MapView but rather to provide supplementary map editing with minimal setup outside installation of OXCE. The primary features in this release are
+
+- Editing of maps included in the currently loaded set of mods
+- Creating new maps from the terrains defined in the currently loaded set of mods
+- Editing single tiles at a time by adding, changing, or removing objects within the tile
+- Editing single AI nodes at a time by adding, moving, changing, and removing them and their links
+- Switching between tile and AI node editing modes
+- Undoing and redoing single tile/node edits
+- Saving edited .MAP and .RMP files in the current OXCE user folder
+- Sample ruleset for implementation of the edited .MAP and .RMP files in the openxcom.log file
+- Opening the main Map Editor Menu for creating/selecting a new map to edit directly from the Editor Interface.
+- Editing multiple tiles/nodes at a time by both rectangular selection and paintbrush-style selection tools
+- Copying, cutting, and pasting selections of multiple tiles/nodes at once
+- Find and replace tools for searching and editing tile and node content
+- Searching of text lists in the Map Editor Menu
+- Find and replace tools for searching and editing tile and node content
+
+The following features are planned for future releases:
+
+- Option to attempt to match MCDs across maps when pasting tiles
+- Creating new maps with custom terrains from a selection of terrain data sets (.MCD files) from the currently loaded set of mods
+- Direct loading of .MAP files from a specified directory using a supplementary file to indicate which terrain data sets to use
+- Resizing maps
+- Improved Map Editor main menu
+- Testing map being edited in the battlescape before saving and importing changes due to tile destruction
+
 ## Installation
 
 OpenXcom requires a vanilla copy of the X-COM resources -- from either or both
