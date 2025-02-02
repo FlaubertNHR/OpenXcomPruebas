@@ -180,11 +180,8 @@ struct EngineData
  * List of engines that current version support.
  */
 const EngineData supportedEngines[] = {
-	{ OPENXCOM_VERSION_ENGINE, { OPENXCOM_VERSION_NUMBER }},
-	{ "Hangars Reworked", { 1,0,0,0 }},
-	{ "OXCE-MoreThan8Bases", { 1,0,0,0 }},		
-	{ "Extended_MAP2", { 1,0,0,0 }},	 
-	{ "Extended", { 7,15,0,0 }},	
+	{ OPENXCOM_VERSION_ENGINE, { OPENXCOM_VERSION_NUMBER }},	
+	{ "Extended", { 8,0,7,0 }},	
 	{ "", { 0, 0, 0, 0 } }, // assume that every engine support mods from base game, remove if its not true.
 };
 
