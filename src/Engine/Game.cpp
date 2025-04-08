@@ -831,24 +831,6 @@ MapEditor *Game::getMapEditor()
 }
 
 /**
- * Sets the pointer to the Map Editor to save it for multiple states
- * @param mapEditor Pointer to the new Map Editor
- */
-void Game::setMapEditor(MapEditor *mapEditor)
-{
-	delete _mapEditor; // there can only be one!
-	_mapEditor = mapEditor;
-}
-
-/**
- * Gets the Map Editor
- */
-MapEditor *Game::getMapEditor()
-{
-	return _mapEditor;
-}
-
-/**
  * Deletes the Map Editor
  */
 void Game::deleteMapEditor()
