@@ -114,7 +114,7 @@ void RuleCraft::load(const YAML::YamlNodeReader& node, Mod *mod, const ModScript
 	{
 		_marker = mod->getOffset(reader["marker"].readVal(_marker), 8);
 	}
-	reader.tryRead("hangarType", _hangarType));
+	reader.tryRead("hangarType", _hangarType);
 	reader.tryRead("weapons", _weapons);	
 	reader.tryRead("maxUnitsLimit", _maxUnitsLimit);
 	reader.tryRead("pilots", _pilots);
