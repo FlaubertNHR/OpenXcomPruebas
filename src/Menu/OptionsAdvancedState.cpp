@@ -366,6 +366,21 @@ void OptionsAdvancedState::lstOptionsClick(Action *action)
 			min = 0;
 			max = 3;
 		}
+		else if (i == &Options::shootingSpreadMode)
+		{
+			min = 0;
+			max = 2;
+		}
+		else if (i == &Options::battleRealisticShotDispersion)
+		{
+			min = 0;
+			max = 1;
+		}
+		else if (i == &Options::battleRealisticCoverEfficiency)
+		{
+			min = 0;
+			max = 4;
+		}		
 		else if (i == &Options::changeValueByMouseWheel)
 		{
 			min = 0;
