@@ -107,6 +107,7 @@ OPT int oxceReactionFireThreshold;
 OPT bool oxceAutoSell;
 OPT bool oxceAutomaticPromotions;
 OPT bool oxceEnableOffCentreShooting;
+OPT bool oxceUniformShootingSpread;
 OPT int oxceCrashedOrLanded;
 
 // OXCE hidden, accessible only via options.cfg
