@@ -574,7 +574,8 @@ void createOptionsOTHER()
 void createAdvancedOptionsOTHER()
 {
 	// your fork's advanced options here
-_info.push_back(OptionInfo(OPTION_OTHER, "battleRealisticAccuracy", &battleRealisticAccuracy, false, "STR_BATTLEREALISTICACCURACY", "STR_BATTLESCAPE"));
+	_info.push_back(OptionInfo(OPTION_OTHER, "shootingSpreadMode", &shootingSpreadMode, 0, "STR_SHOOTING_SPREAD_MODE", "STR_BATTLESCAPE"));
+    _info.push_back(OptionInfo(OPTION_OTHER, "battleRealisticAccuracy", &battleRealisticAccuracy, false, "STR_BATTLEREALISTICACCURACY", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo(OPTION_OTHER, "battleRealisticImprovedSnap", &battleRealisticImprovedSnap, true, "STR_BATTLEREALISTICIMPSNAP", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo(OPTION_OTHER, "battleRealisticImprovedAimed", &battleRealisticImprovedAimed, true, "STR_BATTLEREALISTICIMPAIMED", "STR_BATTLESCAPE"));
 	_info.push_back(OptionInfo(OPTION_OTHER, "battleRealisticImprovedLof", &battleRealisticImprovedLof, false, "STR_BATTLEREALISTICIMPLOF", "STR_BATTLESCAPE"));	

@@ -509,24 +509,27 @@ void Projectile::applyAccuracyRCAS(Position origin, Position *target, double acc
 	int distanceVoxels = 0;
 	bool hasLOS = false;
 
+	// Apply penalty for having no LOS to target
 	int noLOSAccuracyPenalty = _action.weapon->getRules()->getNoLOSAccuracyPenalty(_mod);
 	if (noLOSAccuracyPenalty != -1)
 	{
-		Tile *t = _save->getTile(target->toTile());
+		Tile* t = _save->getTile(target->toTile());
 		if (t)
 		{
-			BattleUnit *bu = _action.actor;
-			BattleUnit *targetUnit = t->getOverlappingUnit(_save); // we can call TileEngine::visible() only if the target unit is on the same tile
+			BattleUnit* bu = _action.actor;
+			BattleUnit* targetUnit = t->getUnit(); // we can call TileEngine::visible() only if the target unit is on the same tile
 
 			if (targetUnit)
 			{
-				t = targetUnit->getTile(); // Refresh tile from unit
 				hasLOS = _save->getTileEngine()->visible(bu, t);
 			}
 			else
 			{
 				hasLOS = _save->getTileEngine()->isTileInLOS(&_action, t, false);
 			}
+
+			if (!hasLOS)
+				accuracy = accuracy * noLOSAccuracyPenalty / 100;
 		}
 	}
 
@@ -556,7 +559,7 @@ void Projectile::applyAccuracyRCAS(Position origin, Position *target, double acc
 		int targetSize = 0;
 		double sizeMultiplier = 0;
 		double exposure = 0.0;
-        const Mod::AccuracyModConfig* AccuracyMod = _mod->getAccuracyModConfig();
+		const Mod::AccuracyModConfig* AccuracyMod = _mod->getAccuracyModConfig();
 		bool coverHasEffect = AccuracyMod->coverEfficiency[ (int)Options::battleRealisticCoverEfficiency ];
 		double coverEfficiencyCoeff = AccuracyMod->coverEfficiency[ (int)Options::battleRealisticCoverEfficiency ] / 100.0;
 
@@ -615,7 +618,7 @@ void Projectile::applyAccuracyRCAS(Position origin, Position *target, double acc
 				Position tempOrigin = _save->getTileEngine()->getOriginVoxel(_action, shooterUnit->getTile());
 				if (selectedOrigin == TileEngine::invalid) selectedOrigin = tempOrigin;
 
-				double tempExposure = _save->getTileEngine()->checkVoxelExposure(&tempOrigin, targetTile, shooterUnit, true, &tempVoxels, false);
+				double tempExposure = _save->getTileEngine()->checkVoxelExposure( &tempOrigin, targetTile, shooterUnit, true, &tempVoxels, false);
 
 				if ((int)tempVoxels.size() > exposedVoxelsCount)
 				{
@@ -645,12 +648,6 @@ void Projectile::applyAccuracyRCAS(Position origin, Position *target, double acc
 		else if (distanceTiles < lowerLimit)
 		{
 			real_accuracy -= (lowerLimit - distanceTiles) * weapon->getDropoff();
-		}
-
-		// Apply No-LOS penalty if presented
-		if (noLOSAccuracyPenalty != -1 && !hasLOS)
-		{
-			real_accuracy = real_accuracy * noLOSAccuracyPenalty / 100;
 		}
 
 		int unitAccuracy = shooterUnit->getBaseStats()->firing;
@@ -783,16 +780,19 @@ void Projectile::applyAccuracyRCAS(Position origin, Position *target, double acc
 		{
 			if (targetUnit)	*target = exposedVoxels.at(RNG::generate(0, exposedVoxelsCount-1)); // Aim to random exposed voxel of the target
 		}
+
 		else if (hit_successful && targetUnit) // "Hitting" hidden unit
 		{
 			target->x -= target->x % Position::TileXY - Position::TileXY / 2;
 			target->y -= target->y % Position::TileXY - Position::TileXY / 2;
 			target->z -= target->z % Position::TileZ - Position::TileZ / 2;
-        }		
+        }
+
 		else if (hit_successful && isTargetObject) // "Hitting" a tile with an object
 		{
 			// just leave it "as is"
 		}
+
 		else if (hit_successful) // "Hitting" empty tile
 		{
 			target->x += RNG::generate(-3, 3); // Add some deviation in XY plane - Z deviation leads to obvious misses
@@ -881,7 +881,7 @@ void Projectile::applyAccuracyRCAS(Position origin, Position *target, double acc
 
 			int distanceDeviation = AccuracyMod->distanceDeviation[idx];
 
-            // Less dispersion with two-handers
+			// Less dispersion with two-handers
 			int oneHandWeaponDeviation = 0;
 			if (!weapon->isTwoHanded()) oneHandWeaponDeviation = AccuracyMod->oneHandWeaponDeviation[idx];
 			// TODO: add check for penalty !
@@ -889,13 +889,14 @@ void Projectile::applyAccuracyRCAS(Position origin, Position *target, double acc
 			int kneelDeviation = 0;
 			if (shooterUnit->isKneeled()) kneelDeviation = AccuracyMod->kneelDeviation[idx];
 
-            int accuracyDeviation = (50 - shooterUnit->getBaseStats()->firing) / 10;
+			int accuracyDeviation = (50 - shooterUnit->getBaseStats()->firing) / 10;
+
 			double distanceDeviationCoeff = (double)distanceVoxels / (10 * Position::TileXY);
 
 			int deviation = (distanceDeviation + oneHandWeaponDeviation + kneelDeviation
                             + shotTypeDeviation + accuracyDeviation*2) * distanceDeviationCoeff;
 
-		    int horizontal_deviation = deviation * AccuracyMod->horizontalSpreadCoeff[idx];
+			int horizontal_deviation = deviation * AccuracyMod->horizontalSpreadCoeff[idx];
 			int vertical_deviation = deviation * AccuracyMod->verticalSpreadCoeff[idx];
 
 			Position deviate;
@@ -1014,21 +1015,33 @@ void Projectile::applyAccuracyRCAS(Position origin, Position *target, double acc
 
 		int xyShift, zShift;
 
-		if (xDist / 2 <= yDist)				//yes, we need to add some x/y non-uniformity
-			xyShift = xDist / 4 + yDist;	//and don't ask why, please. it's The Commandment
-		else
-			xyShift = (xDist + yDist) / 2;	//that's uniform part of spreading
+		if (Options::shootingSpreadMode == 1) // Uniform shooting spread
+		{
+			if (xDist <= yDist)
+				xyShift = xDist / 4 + yDist;
+			else
+				xyShift = xDist + yDist / 4;
+
+			xyShift *= 0.839; // Constant to match average xyShift to vanilla
+		}
+
+		else if (Options::shootingSpreadMode == 2) // Tightened uniform shooting spread
+		{
+			xyShift = (xDist + yDist) / 2;	//Uniform part of spreading from vanilla
+		}
+
+		else // if Options::shootingSpreadMode == 0 - Vanilla shooting spread
+		{
+			if (xDist / 2 <= yDist)				//yes, we need to add some x/y non-uniformity
+				xyShift = xDist / 4 + yDist;	//and don't ask why, please. it's The Commandment
+			else
+				xyShift = (xDist + yDist) / 2;	//that's uniform part of spreading
+		}
 
 		if (xyShift <= zDist)				//slight z deviation
 			zShift = xyShift / 2 + zDist;
 		else
 			zShift = xyShift + zDist / 2;
-
-		// Apply No-LOS penalty if presented
-		if (noLOSAccuracyPenalty != -1 && !hasLOS)
-		{
-			accuracy *= noLOSAccuracyPenalty / 100.0;
-		}
 
 		int deviation = RNG::generate(0, 100) - (accuracy * 100);
 
@@ -1057,8 +1070,40 @@ void Projectile::applyAccuracyRCAS(Position origin, Position *target, double acc
 
 		deviation = std::max(1, zShift * deviation / 200);	//range ratio
 
-		target->x += RNG::generate(0, deviation) - deviation / 2;
-		target->y += RNG::generate(0, deviation) - deviation / 2;
+		if (Options::shootingSpreadMode == 1 || Options::shootingSpreadMode == 2) // Make spread round instead of square
+		{
+			const double SECONDARY_SPREAD_COEFF = 1.1; // Increasing spread radius to compensate additional hits
+
+			bool resultShifted = false;
+			int dX, dY;
+
+			for (int i = 0; i < 15; ++i) // Break from this cycle when proper target is found
+			{
+				dX = RNG::generate(0, deviation) - deviation / 2;
+				dY = RNG::generate(0, deviation) - deviation / 2;
+
+				int radiusSq = dX*dX + dY*dY;
+				int deviateRadius = deviation / 2;
+				int deviateRadiusSq = deviateRadius * deviateRadius;
+
+				if (radiusSq <= deviateRadiusSq) break;  // If we inside of the spread circle - we're done!
+
+				if (!resultShifted)
+				{
+					resultShifted = true;
+					deviation *= SECONDARY_SPREAD_COEFF; // Change spread radius for second+ attempts
+				}
+			}
+			target->x += dX;
+			target->y += dY;
+		}
+
+		else // Classic shooting spread
+		{
+			target->x += RNG::generate(0, deviation) - deviation / 2;
+			target->y += RNG::generate(0, deviation) - deviation / 2;
+		}
+
 		target->z += RNG::generate(0, deviation / 2) / 2 - deviation / 8;
 	}
 
@@ -1083,6 +1128,7 @@ target_calculated:
 		target->z = (int)(origin.z + maxRangeVoxels * sin_fi);
 	}
 }
+
 
 /**
  * Moves further in the trajectory.
