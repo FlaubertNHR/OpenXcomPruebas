@@ -62,14 +62,16 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	_game->getSavedGame()->getAvailableTransformations(availableTransformations, _game->getMod(), _base);
 	bool isTransformationAvailable = availableTransformations.size() > 0;
 
-	// Always show Combo Box and Three buttons: one button for actions(Memorial, Trainings, Transormations,...)
+	// if both training buttons would be displayed, or if there are any transformations, switch to combobox
+	bool showCombobox = isTransformationAvailable || (isPsiBtnVisible && isTrnBtnVisible) || Options::oxceAlternateCraftEquipmentManagement;
+	// Always show Combo Box and Three buttons: one button for actions(Memorial, Trainings, Transformations,...)
 	// another button for craft selection; and a 3rd one for "Ok"
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(64, 16, 248, 176);
 	_btnMemorial = preAdd(new TextButton(96, 16, 8, 176));
 	_btnPsiTraining = preAdd(new TextButton(96, 16, 112, 176));
-	_btnTraining = preAdd(new TextButton(96, 16, 112, 176));	
+	_btnTraining = preAdd(new TextButton(96, 16, 112, 176));
 	_cbxScreenActions = preAdd(new ComboBox(this, 128, 16, 8, 176, true));
 	_cbxFilterByCraft = preAdd(new ComboBox(this, 96, 16, 144, 176, true));	
 	_txtTitle = new Text(168, 17, 16, 8);
@@ -137,27 +139,27 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 			_availableOptions.push_back("STR_TRANSFORMATIONS_OVERVIEW");
 		}
 
-	bool refreshDeadSoldierStats = false;
-	for (const auto* transformationRule : availableTransformations)
-	{
-		_availableOptions.push_back(transformationRule->getName());
-		if (transformationRule->isAllowingDeadSoldiers())
+		bool refreshDeadSoldierStats = false;
+		for (const auto* transformationRule : availableTransformations)
 		{
-			refreshDeadSoldierStats = true;
+			_availableOptions.push_back(transformationRule->getName());
+			if (transformationRule->isAllowingDeadSoldiers())
+			{
+				refreshDeadSoldierStats = true;
+			}
 		}
-	}
-	if (refreshDeadSoldierStats)
-	{
-		for (auto* deadMan : *_game->getSavedGame()->getDeadSoldiers())
+		if (refreshDeadSoldierStats)
 		{
-			deadMan->prepareStatsWithBonuses(_game->getMod()); // refresh stats for sorting
+			for (auto* deadMan : *_game->getSavedGame()->getDeadSoldiers())
+			{
+				deadMan->prepareStatsWithBonuses(_game->getMod()); // refresh stats for sorting
+			}
 		}
+
+		_cbxScreenActions->setOptions(_availableOptions, true);
+		_cbxScreenActions->setSelected(0);
+		_cbxScreenActions->onChange((ActionHandler)&SoldiersState::cbxScreenActionsChange);
 	}
-
-	_cbxScreenActions->setOptions(_availableOptions, true);
-	_cbxScreenActions->setSelected(0);
-	_cbxScreenActions->onChange((ActionHandler)&SoldiersState::cbxScreenActionsChange);
-
 	// _cbxFilterByCraft
 	_craftOptions.clear();  // NHR: could be a std::string? defined here
 	_craftOptions.push_back("STR_NO_CRAFT_FILTER");
